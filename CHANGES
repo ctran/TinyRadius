@@ -1,0 +1,59 @@
+TinyRadius Change Log
+
+Plans for 1.0: Asynchronous Radius client (see TODO)
+
+0.9.9:
+- small bug fix in MemoryDictionary
+- switch to Maven2
+
+0.9.8:
+- small bug fix in attribute class
+
+0.9.7:
+- bug fix: request authenticator for accounting request packets
+  has not been checked, added
+  AccountingRequest.checkRequestAuthenticator()
+  thanks to Radovan Semancik!
+
+0.9.6:
+- bug fix: implicit conversion of byte to int failed
+  for values bigger than 127 (class VendorSpecificAttribute)
+  thanks to Aldir O. Brandao Jr and to Bjørn Nordbø!
+- bug fix: SocketException terminated Radius listen thread
+  in RadiusServer class
+- improved duplicate packet check by using Radius Authenticator
+  field which includes a checksum over the whole packet
+
+0.9.5:
+- further Radius packet type codes (COA, Disconnect)
+- implemented Radius proxy support (see org.tinyradius.proxy)
+  thanks to glanz!
+
+0.9.4:
+- greatly improved dictionary support: new package
+  org.tinyradius.dictionary, see package.html
+- INCLUDE directive for dictionary files
+- easy access to Vendor-Specific sub-attributes
+  by their name or by vendor ID/type code
+  through methods in RadiusPacket
+- ability to set listen address for RadiusServer
+- improved IP attribute (IP represented as string or long)
+
+0.9.3:
+- fixed a bug concerning sub attributes of sub-type 26
+  of a Vendor-Specific attributes
+- structural enhancements for Vendor-Specific attributes
+- fixed a NullPointerException occuring for sub attributes not
+  in the attribute dictionary
+
+0.9.2:
+- enhanced RadiusServer to include the client address
+  in the callback methods accessRequestReceived() and
+  accountingRequestReceived()
+
+0.9.1:
+- added commons-logging.jar and various log messages to
+  the classes RadiusServer/RadiusClient
+       
+0.9:
+- initial public release

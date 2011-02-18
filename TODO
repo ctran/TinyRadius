@@ -1,0 +1,6 @@
+- implement asynchronous radius client for sending multiple requests
+  in parallel while still waiting for responses to earlier packets
+  
+- global dictionary manager allowing to configure a dictionary
+  to be used for all future Radius packets:
+  replace DefaultDictionary.getInstance()

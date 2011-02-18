@@ -1,0 +1,174 @@
+<html>
+
+<head>
+<title>TinyRadius: Java Radius library</title>
+</head>
+
+<body>
+
+<h1><img src="tinyradius-small.png" align="left"/>TinyRadius: Java Radius library</h1>
+
+<p>TinyRadius is a simple, small and fast Java Radius library capable of
+sending and receiving Radius packets of all types. It is released under the 
+terms of the LGPL.</p>
+
+<p><A href="https://sourceforge.net/projects/tinyradius/">SourceForge Project Overview</A> | 
+<A href="apidoc/index.html">JavaDoc API documentation</A> |
+<A href="http://sourceforge.net/project/showfiles.php?group_id=136196">Download current release</a></p>
+
+<h3>What you can do with it:</h3>
+
+<ul>
+<li>send and receive Radius packets (Access-Request, Access-Accept,
+Access-Reject, Access-Challenge, Accounting-Request, Accounting-Response
+and others) from within your Java application</li>
+<li>use PAP and CHAP as authentication types for Access-Request messages</li>
+<li>attach arbitrary Radius attributes to the packets employing attribute
+names read from a dictionary file</li>
+<li>send and receive Radius packets with "Vendor-Specific" attributes</li>
+</ul>
+
+<h3>What you cannot/should not do with it:</h3>
+
+<ul>
+<li>set up a complex Radius server (please use <a href="http://www.freeradius.org">FreeRadius</a>
+or <a href="http://jradius.sourceforge.net/">JRadius</a>)</li>
+<li>connect the server to a user database without writing Java code
+(this library is ment to be plugged in applications and not to be
+used as a stand-alone server)</li>
+</ul>
+
+<p>TinyRadius comes with small sample applications which show how to integrate
+it as a Radius server and a Radius client.</p>
+
+<h3>What are the requirements?</h3>
+
+<ul>
+<li>TinyRadius works well and is tested with JDK 1.1 through 1.6.
+I recommend using at least JDK 1.4.</li>
+<li>You need Apache Commons Logging to compile and run
+TinyRadius. This small library is included with the
+TinyRadius release.</li>
+</ul>
+
+<h3>EXAMPLE 1: Authentication made easy</h3>
+
+<p>If you do not need to set special attribute values, you can just use the
+method authenticate() from the RadiusClient:</p>
+
+<pre>RadiusClient rc = new RadiusClient(host, sharedSecret);
+if (rc.authenticate(userName, password)) {
+	...</pre>
+
+
+<h3>EXAMPLE 2: Sending an Access-Request with multiple attributes</h3>
+
+<p>1. Create a RadiusClient object with the host name and shared secret
+of the Radius server you wish to contact. You may set additional details
+(port numbers, for example) using methods of this object.</p>
+
+<pre>RadiusClient rc = new RadiusClient(host, shared);</pre>
+
+<p>2. Create the Access-Request Radius packet. Pass the user name and
+password in the constructor. The User-Name attribute will be added
+on construction of the object, while the User-Password attribute (PAP)
+or the CHAP-Password and CHAP-Challenge attributes (CHAP) will be
+generated when encoding the packet because the request authenticator of
+the packet is required to encrypt the password.</p>
+
+<pre>AccessRequest ar = new AccessRequest(user, pass);
+ar.setAuthProtocol(AccessRequest.AUTH_CHAP); // or AUTH_PAP</pre>
+
+<p>3. Set further attributes. Note that TinyRadius resolves the attribute type
+from the given type name and that it converts the IP address and the name
+of the constant (Login-User) to the right values. Please also note how
+the Vendor-Specific (WISPr) sub-attribute &quot;WISPr-Location-ID&quot;
+is set. This call results in the creation of a Vendor-Specific attribute
+with the proper vendor ID and the addition of a sub-attribute to this
+attribute.</p>
+
+<pre>ar.addAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
+ar.addAttribute("NAS-IP-Address", "192.168.0.100");
+ar.addAttribute("Service-Type", "Login-User");
+ar.addAttribute("WISPr-Location-ID", "ger,de.sample-location");</pre>
+
+<p>4. Send the packet and receive the response.</p>
+
+<pre>RadiusPacket response = rc.authenticate(ar);
+if (response.getPacketType() == RadiusPacket.ACCESS_ACCEPT) {
+	...</pre>
+
+
+<h3>EXAMPLE 3: How to implement a Radius server</h3>
+
+<p>You need to subclass <code>org.tinyradius.util.RadiusServer</code>.
+Provide an implementation for the following methods:</p>
+
+<pre>String getSharedSecret(InetAddress client);</pre>
+
+<p>	This method should check whether the passed client is allowed to
+	communicate with the Radius server. If this is the case, it should
+	return the shared secret that secures the communication to the client.</p>
+
+<pre>String getUserPassword(String userName);</pre>
+
+<p>	This method returns the password for the given user. If you have not
+	access to the password (in the case of CHAP) or you need finer control
+	(you want to set attributes for the response packet, for example), you
+	have to override the following method.</p>
+	
+<pre>RadiusPacket accessRequestReceived(AccessRequest request, InetAddress client);
+RadiusPacket accountingRequestReceived(AccountingRequest request, InetAddress client);</pre>
+
+<p>	Override this methods for fine control about the way Accounting-Request
+	and Access-Request packets are handled. Just return the Radius packet
+	to be sent as a response or null if the request should be ignored.</p>
+
+<p>After implementing your own server class, you can start and stop the server
+using the methods start() and stop(). For start(), you pass whether the server
+should listen on the auth and/or the acct port. This method spawns new threads.</p>
+
+<pre>RadiusServer server = new MyRadiusServer();
+server.start(true, true);
+server.stop();</pre>
+
+
+<h3>EXAMPLE 4: How to implement a Radius proxy server</h3>
+
+<p>You need to subclass <code>org.tinyradius.proxy.RadiusProxy</code>.
+In addition to implementing the abstract methods from <code>RadiusServer</code>,
+you have to provide an implementation for the following method.</p>
+
+<pre>RadiusEndpoint getProxyServer(RadiusPacket packet, RadiusEndpoint client);</pre>
+
+<p>Using the provided client endpoint (containing the client's IP address,
+the port number as well as the shared secret) you have to decide whether
+the given Radius packet should be forwarded or if the TinyRadius server
+itself shall handle the packet.</p>
+
+<p>If you return <code>null</code>, the packet will be dealt with as
+usual. Otherwise, the packet will be proxied (adding a Proxy-State attribute)
+to the returned Radius server.</p>
+
+<p>For a complete example, please check the three classes <code>TestProxy</code>,
+<code>TestServer</code> and <code>TestClient</code>, which can be used to
+set up an easy proxying Radius infrastructure only with TinyRadius and
+only using &quot;localhost&quot;.</p>
+
+<hr/>
+
+<p>Please do not hesitate to contact me if you have got questions or
+suggestions.</p>
+
+Matthias Wuttke<br/>
+<a href="mail:post@matthias-wuttke.de">post@matthias-wuttke.de</a><br/>
+<a href="http://tinyradius.sourceforge.net/">http://tinyradius.sourceforge.net/</a>
+
+<hr/>
+
+<a href="http://sourceforge.net">
+<img src="http://sourceforge.net/sflogo.php?group_id=136196&amp;type=5" width="210" height="62" border="0" alt="SourceForge.net Logo"/>
+</a>
+ 
+</body>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.tinyradius</groupId>
+    <artifactId>tinyradius</artifactId>
+    <name>TinyRadius Java Radius Library</name>
+    <version>0.9.9</version>
+    <url>http://sourceforge.net/projects/tinyradius</url>
+    <developers>
+        <developer>
+            <id>wuttke</id>
+            <name>Matthias Wuttke</name>
+            <email>mw@teuto.net</email>
+            <timezone>CEST</timezone>
+        </developer>
+    </developers>
+    <repositories>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>https://maven2-repository.dev.java.net/nonav/repository</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <sourceDirectory>src</sourceDirectory>        
+    </build>
+</project>

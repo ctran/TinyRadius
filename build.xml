@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<!--
+$Id: build.xml,v 1.17 2010/02/03 15:56:54 wuttke Exp $   
+created 11.04.2005 18:05:36                                                        
+TinyRadius build file
+-->
+<project name="TinyRadius" default="compile">
+	
+	<property name="src" location="src"/>
+	<property name="build" location="build"/>
+	<property name="dist" location="dist"/>
+	<property name="version" value="1.0"/>
+	<property name="classpath" value="lib/commons-logging.jar"/>
+	
+	<target name="init">
+		<tstamp/>
+	    <mkdir dir="${build}"/>
+	</target>
+	
+	<target name="compile" depends="init">
+        <javac srcdir="${src}" 
+               destdir="${build}" 
+               classpath="${classpath}" 
+               debug="true" 
+               source="1.2"
+               target="1.1"/>
+    </target>
+
+    <target name="jar" depends="compile">
+	    <mkdir dir="${dist}"/>
+    	<copy file="${src}/org/tinyradius/dictionary/default_dictionary" todir="${build}/org/tinyradius/dictionary"/>
+        <jar jarfile="${dist}/TinyRadius-${version}.jar" basedir="${build}"/>
+    </target>
+	
+	<target name="clean">
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+		<delete dir="doc/apidoc"/>
+	</target>
+
+	<target name="javadoc" depends="compile">
+		<javadoc destdir="doc/apidoc"
+			access="protected" 
+			use="true" notree="false" nonavbar="false" noindex="false"
+			splitindex="true" author="true" version="true"
+			nodeprecatedlist="false" nodeprecated="false"
+			packagenames="org.tinyradius.packet,org.tinyradius.util,org.tinyradius.test,org.tinyradius.attribute,org.tinyradius.dictionary"
+			sourcepath="${src}" classpath="${build}:${classpath}"
+			doctitle="TinyRadius: Java Radius Library"
+			additionalparam=" -encoding iso-8859-1 -docencoding iso-8859-1 -charset iso-8859-1"/>
+	</target>
+	
+	<target name="dist" depends="jar,javadoc">
+		<delete file="${dist}/TinyRadius-${version}.tar.gz"/>
+		<tar tarfile="${dist}/TinyRadius-${version}.tar">
+			<tarfileset dir=".">
+				<exclude name="build/"/>
+				<exclude name="bin/"/>
+			</tarfileset>
+		</tar>
+		<gzip zipfile="${dist}/TinyRadius-${version}.tar.gz" src="${dist}/TinyRadius-${version}.tar"/>
+		<delete file="${dist}/TinyRadius-${version}.tar"/>
+	</target>
+	
+	<target name="sourceforge" depends="dist">
+	    <ftp server="upload.sourceforge.net"
+	         remotedir="incoming"
+	         userid="anonymous"
+	         password=""
+	         verbose="yes"
+	         passive="yes">
+	    	<fileset file="${dist}/TinyRadius-${version}.tar.gz"/>
+	    </ftp>
+	</target>
+	
+	<!-- requires the passphrase of the SSH private key
+	to be cached in the SSH agent -->
+	<target name="website" depends="javadoc">
+		<exec executable="scp">
+			<arg line="-r"/>
+			<arg line="doc/apidoc"/>
+			<arg line="wuttke@tinyradius.sf.net:/home/groups/t/ti/tinyradius/htdocs"/>
+		</exec>
+		<exec executable="scp">
+			<arg line="doc/tinyradius.html"/>
+			<arg line="wuttke@tinyradius.sf.net:/home/groups/t/ti/tinyradius/htdocs/index.html"/>
+		</exec>
+	</target>
+
+</project>
+
