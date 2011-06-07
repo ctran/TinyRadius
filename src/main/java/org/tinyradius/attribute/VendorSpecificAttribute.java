@@ -10,7 +10,6 @@ package org.tinyradius.attribute;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.tinyradius.dictionary.AttributeType;
@@ -26,6 +25,20 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * Radius attribute type code for Vendor-Specific
 	 */
 	public static final int VENDOR_SPECIFIC = 26;
+
+	private static int unsignedByteToInt(byte b) {
+		return b & 0xFF;
+	}
+
+	/**
+	 * Sub attributes. Only set if isRawData == false.
+	 */
+	private List<RadiusAttribute> subAttributes = new ArrayList<RadiusAttribute>();
+
+	/**
+	 * Vendor ID of sub-attributes.
+	 */
+	private int childVendorId;
 
 	/**
 	 * Constructs an empty Vendor-Specific attribute that can be read from a
@@ -47,47 +60,15 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	}
 
 	/**
-	 * Sets the vendor ID of the child attributes.
-	 * 
-	 * @param childVendorId
-	 */
-	public void setChildVendorId(int childVendorId) {
-		this.childVendorId = childVendorId;
-	}
-
-	/**
-	 * Returns the vendor ID of the sub-attributes.
-	 * 
-	 * @return vendor ID of sub attributes
-	 */
-	public int getChildVendorId() {
-		return childVendorId;
-	}
-
-	/**
-	 * Also copies the new dictionary to sub-attributes.
-	 * 
-	 * @param dictionary
-	 *            dictionary to set
-	 * @see org.tinyradius.attribute.RadiusAttribute#setDictionary(org.tinyradius.dictionary.Dictionary)
-	 */
-	public void setDictionary(Dictionary dictionary) {
-		super.setDictionary(dictionary);
-		for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
-			attr.setDictionary(dictionary);
-		}
-	}
-
-	/**
 	 * Adds a sub-attribute to this attribute.
 	 * 
 	 * @param attribute
 	 *            sub-attribute to add
 	 */
 	public void addSubAttribute(RadiusAttribute attribute) {
-		if (attribute.getVendorId() != getChildVendorId())
+		if (attribute.getVendorId() != getChildVendorId()) {
 			throw new IllegalArgumentException("sub attribut has incorrect vendor ID");
+		}
 
 		subAttributes.add(attribute);
 	}
@@ -103,62 +84,36 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 *                invalid sub-attribute name or value
 	 */
 	public void addSubAttribute(String name, String value) {
-		if (name == null || name.length() == 0)
+		if (name == null || name.length() == 0) {
 			throw new IllegalArgumentException("type name is empty");
-		if (value == null || value.length() == 0)
+		}
+		if (value == null || value.length() == 0) {
 			throw new IllegalArgumentException("value is empty");
+		}
 
-		AttributeType type = getDictionary().getAttributeTypeByName(name);
-		if (type == null)
+		final AttributeType type = getDictionary().getAttributeTypeByName(name);
+		if (type == null) {
 			throw new IllegalArgumentException("unknown attribute type '" + name + "'");
-		if (type.getVendorId() == -1)
+		}
+		if (type.getVendorId() == -1) {
 			throw new IllegalArgumentException("attribute type '" + name + "' is not a Vendor-Specific sub-attribute");
-		if (type.getVendorId() != getChildVendorId())
+		}
+		if (type.getVendorId() != getChildVendorId()) {
 			throw new IllegalArgumentException("attribute type '" + name + "' does not belong to vendor ID " + getChildVendorId());
+		}
 
-		RadiusAttribute attribute = createRadiusAttribute(getDictionary(), getChildVendorId(), type.getTypeCode());
+		final RadiusAttribute attribute = createRadiusAttribute(getDictionary(), getChildVendorId(), type.getTypeCode());
 		attribute.setAttributeValue(value);
 		addSubAttribute(attribute);
 	}
 
 	/**
-	 * Removes the specified sub-attribute from this attribute.
+	 * Returns the vendor ID of the sub-attributes.
 	 * 
-	 * @param attribute
-	 *            RadiusAttribute to remove
+	 * @return vendor ID of sub attributes
 	 */
-	public void removeSubAttribute(RadiusAttribute attribute) {
-		if (!subAttributes.remove(attribute))
-			throw new IllegalArgumentException("no such attribute");
-	}
-
-	/**
-	 * Returns the list of sub-attributes.
-	 * 
-	 * @return List of RadiusAttribute objects
-	 */
-	public List getSubAttributes() {
-		return subAttributes;
-	}
-
-	/**
-	 * Returns all sub-attributes of this attribut which have the given type.
-	 * 
-	 * @param attributeType
-	 *            type of sub-attributes to get
-	 * @return list of RadiusAttribute objects, does not return null
-	 */
-	public List getSubAttributes(int attributeType) {
-		if (attributeType < 1 || attributeType > 255)
-			throw new IllegalArgumentException("sub-attribute type out of bounds");
-
-		LinkedList result = new LinkedList();
-		for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-			RadiusAttribute a = (RadiusAttribute) i.next();
-			if (attributeType == a.getAttributeType())
-				result.add(a);
-		}
-		return result;
+	public int getChildVendorId() {
+		return childVendorId;
 	}
 
 	/**
@@ -173,13 +128,14 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 *             requested sub-attribute type
 	 */
 	public RadiusAttribute getSubAttribute(int type) {
-		List attrs = getSubAttributes(type);
-		if (attrs.size() > 1)
+		final List<RadiusAttribute> attrs = getSubAttributes(type);
+		if (attrs.size() > 1) {
 			throw new RuntimeException("multiple sub-attributes of requested type " + type);
-		else if (attrs.size() == 0)
+		} else if (attrs.size() == 0) {
 			return null;
-		else
-			return (RadiusAttribute) attrs.get(0);
+		} else {
+			return attrs.get(0);
+		}
 	}
 
 	/**
@@ -193,16 +149,49 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 *             if the attribute occurs multiple times
 	 */
 	public RadiusAttribute getSubAttribute(String type) throws RadiusException {
-		if (type == null || type.length() == 0)
+		if (type == null || type.length() == 0) {
 			throw new IllegalArgumentException("type name is empty");
+		}
 
-		AttributeType t = getDictionary().getAttributeTypeByName(type);
-		if (t == null)
+		final AttributeType t = getDictionary().getAttributeTypeByName(type);
+		if (t == null) {
 			throw new IllegalArgumentException("unknown attribute type name '" + type + "'");
-		if (t.getVendorId() != getChildVendorId())
+		}
+		if (t.getVendorId() != getChildVendorId()) {
 			throw new IllegalArgumentException("vendor ID mismatch");
+		}
 
 		return getSubAttribute(t.getTypeCode());
+	}
+
+	/**
+	 * Returns the list of sub-attributes.
+	 * 
+	 * @return List of RadiusAttribute objects
+	 */
+	public List<RadiusAttribute> getSubAttributes() {
+		return subAttributes;
+	}
+
+	/**
+	 * Returns all sub-attributes of this attribut which have the given type.
+	 * 
+	 * @param attributeType
+	 *            type of sub-attributes to get
+	 * @return list of RadiusAttribute objects, does not return null
+	 */
+	public List<RadiusAttribute> getSubAttributes(int attributeType) {
+		if (attributeType < 1 || attributeType > 255) {
+			throw new IllegalArgumentException("sub-attribute type out of bounds");
+		}
+
+		final LinkedList<RadiusAttribute> result = new LinkedList<RadiusAttribute>();
+		for (final RadiusAttribute a : subAttributes) {
+			if (attributeType == a.getAttributeType()) {
+				result.add(a);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -219,50 +208,11 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 *             attribute occurs multiple times
 	 */
 	public String getSubAttributeValue(String type) throws RadiusException {
-		RadiusAttribute attr = getSubAttribute(type);
+		final RadiusAttribute attr = getSubAttribute(type);
 		if (attr == null) {
 			return null;
 		}
 		return attr.getAttributeValue();
-	}
-
-	/**
-	 * Renders this attribute as a byte array.
-	 * 
-	 * @see org.tinyradius.attribute.RadiusAttribute#writeAttribute()
-	 */
-	public byte[] writeAttribute() {
-		// write vendor ID
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(255);
-		bos.write(getChildVendorId() >> 24 & 0x0ff);
-		bos.write(getChildVendorId() >> 16 & 0x0ff);
-		bos.write(getChildVendorId() >> 8 & 0x0ff);
-		bos.write(getChildVendorId() & 0x0ff);
-
-		// write sub-attributes
-		try {
-			for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-				RadiusAttribute a = (RadiusAttribute) i.next();
-				bos.write(a.writeAttribute());
-			}
-		}
-		catch (IOException ioe) {
-			// occurs never
-			throw new RuntimeException("error writing data", ioe);
-		}
-
-		// check data length
-		byte[] attrData = bos.toByteArray();
-		int len = attrData.length;
-		if (len > 253)
-			throw new RuntimeException("Vendor-Specific attribute too long: " + bos.size());
-
-		// compose attribute
-		byte[] attr = new byte[len + 2];
-		attr[0] = VENDOR_SPECIFIC; // code
-		attr[1] = (byte) (len + 2); // length
-		System.arraycopy(attrData, 0, attr, 2, len);
-		return attr;
 	}
 
 	/**
@@ -271,23 +221,26 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * 
 	 * @see org.tinyradius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
 	 */
+	@Override
 	public void readAttribute(byte[] data, int offset, int length) throws RadiusException {
 		// check length
-		if (length < 6)
+		if (length < 6) {
 			throw new RadiusException("Vendor-Specific attribute too short: " + length);
+		}
 
-		int vsaCode = data[offset];
-		int vsaLen = (data[offset + 1] & 0x000000ff) - 6;
+		final int vsaCode = data[offset];
+		final int vsaLen = (data[offset + 1] & 0x000000ff) - 6;
 
-		if (vsaCode != VENDOR_SPECIFIC)
+		if (vsaCode != VENDOR_SPECIFIC) {
 			throw new RadiusException("not a Vendor-Specific attribute");
+		}
 
 		// read vendor ID and vendor data
 		/*
 		 * int vendorId = (data[offset + 2] << 24 | data[offset + 3] << 16 |
 		 * data[offset + 4] << 8 | ((int)data[offset + 5] & 0x000000ff));
 		 */
-		int vendorId = (unsignedByteToInt(data[offset + 2]) << 24 | unsignedByteToInt(data[offset + 3]) << 16
+		final int vendorId = (unsignedByteToInt(data[offset + 2]) << 24 | unsignedByteToInt(data[offset + 3]) << 16
 		        | unsignedByteToInt(data[offset + 4]) << 8 | unsignedByteToInt(data[offset + 5]));
 		setChildVendorId(vendorId);
 
@@ -295,30 +248,65 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		int pos = 0;
 		int count = 0;
 		while (pos < vsaLen) {
-			if (pos + 1 >= vsaLen)
+			if (pos + 1 >= vsaLen) {
 				throw new RadiusException("Vendor-Specific attribute malformed");
+			}
 			// int vsaSubType = data[(offset + 6) + pos] & 0x0ff;
-			int vsaSubLen = data[(offset + 6) + pos + 1] & 0x0ff;
+			final int vsaSubLen = data[(offset + 6) + pos + 1] & 0x0ff;
 			pos += vsaSubLen;
 			count++;
 		}
-		if (pos != vsaLen)
+		if (pos != vsaLen) {
 			throw new RadiusException("Vendor-Specific attribute malformed");
+		}
 
-		subAttributes = new ArrayList(count);
+		subAttributes = new ArrayList<RadiusAttribute>(count);
 		pos = 0;
 		while (pos < vsaLen) {
-			int subtype = data[(offset + 6) + pos] & 0x0ff;
-			int sublength = data[(offset + 6) + pos + 1] & 0x0ff;
-			RadiusAttribute a = createRadiusAttribute(getDictionary(), vendorId, subtype);
+			final int subtype = data[(offset + 6) + pos] & 0x0ff;
+			final int sublength = data[(offset + 6) + pos + 1] & 0x0ff;
+			final RadiusAttribute a = createRadiusAttribute(getDictionary(), vendorId, subtype);
 			a.readAttribute(data, (offset + 6) + pos, sublength);
 			subAttributes.add(a);
 			pos += sublength;
 		}
 	}
 
-	private static int unsignedByteToInt(byte b) {
-		return b & 0xFF;
+	/**
+	 * Removes the specified sub-attribute from this attribute.
+	 * 
+	 * @param attribute
+	 *            RadiusAttribute to remove
+	 */
+	public void removeSubAttribute(RadiusAttribute attribute) {
+		if (!subAttributes.remove(attribute)) {
+			throw new IllegalArgumentException("no such attribute");
+		}
+	}
+
+	/**
+	 * Sets the vendor ID of the child attributes.
+	 * 
+	 * @param childVendorId
+	 */
+	public void setChildVendorId(int childVendorId) {
+		this.childVendorId = childVendorId;
+	}
+
+	/**
+	 * Also copies the new dictionary to sub-attributes.
+	 * 
+	 * @param dictionary
+	 *            dictionary to set
+	 * @see org.tinyradius.attribute.RadiusAttribute#setDictionary(org.tinyradius.dictionary.Dictionary)
+	 */
+	@Override
+	public void setDictionary(Dictionary dictionary) {
+		super.setDictionary(dictionary);
+		for (final Object element : subAttributes) {
+			final RadiusAttribute attr = (RadiusAttribute) element;
+			attr.setDictionary(dictionary);
+		}
 	}
 
 	/**
@@ -326,23 +314,23 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * 
 	 * @see org.tinyradius.attribute.RadiusAttribute#toString()
 	 */
+	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		final StringBuffer sb = new StringBuffer();
 		sb.append("Vendor-Specific: ");
-		int vendorId = getChildVendorId();
-		String vendorName = getDictionary().getVendorName(vendorId);
+		final int vendorId = getChildVendorId();
+		final String vendorName = getDictionary().getVendorName(vendorId);
 		if (vendorName != null) {
 			sb.append(vendorName);
 			sb.append(" (");
 			sb.append(vendorId);
 			sb.append(")");
-		}
-		else {
+		} else {
 			sb.append("vendor ID ");
 			sb.append(vendorId);
 		}
-		for (Iterator i = getSubAttributes().iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
+		for (final Object element : getSubAttributes()) {
+			final RadiusAttribute attr = (RadiusAttribute) element;
 			sb.append("\n");
 			sb.append(attr.toString());
 		}
@@ -350,12 +338,42 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	}
 
 	/**
-	 * Sub attributes. Only set if isRawData == false.
+	 * Renders this attribute as a byte array.
+	 * 
+	 * @see org.tinyradius.attribute.RadiusAttribute#writeAttribute()
 	 */
-	private List subAttributes = new ArrayList();
+	@Override
+	public byte[] writeAttribute() {
+		// write vendor ID
+		final ByteArrayOutputStream bos = new ByteArrayOutputStream(255);
+		bos.write(getChildVendorId() >> 24 & 0x0ff);
+		bos.write(getChildVendorId() >> 16 & 0x0ff);
+		bos.write(getChildVendorId() >> 8 & 0x0ff);
+		bos.write(getChildVendorId() & 0x0ff);
 
-	/**
-	 * Vendor ID of sub-attributes.
-	 */
-	private int childVendorId;
+		// write sub-attributes
+		try {
+			for (final Object element : subAttributes) {
+				final RadiusAttribute a = (RadiusAttribute) element;
+				bos.write(a.writeAttribute());
+			}
+		} catch (final IOException ioe) {
+			// occurs never
+			throw new RuntimeException("error writing data", ioe);
+		}
+
+		// check data length
+		final byte[] attrData = bos.toByteArray();
+		final int len = attrData.length;
+		if (len > 253) {
+			throw new RuntimeException("Vendor-Specific attribute too long: " + bos.size());
+		}
+
+		// compose attribute
+		final byte[] attr = new byte[len + 2];
+		attr[0] = VENDOR_SPECIFIC; // code
+		attr[1] = (byte) (len + 2); // length
+		System.arraycopy(attrData, 0, attr, 2, len);
+		return attr;
+	}
 }

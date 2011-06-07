@@ -5,7 +5,7 @@
     <groupId>org.tinyradius</groupId>
     <artifactId>tinyradius</artifactId>
     <name>TinyRadius Java Radius Library</name>
-    <version>0.9.9</version>
+    <version>1.0.1</version>
     <url>http://sourceforge.net/projects/tinyradius</url>
     <developers>
         <developer>
@@ -30,6 +30,5 @@
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src</sourceDirectory>        
     </build>
 </project>

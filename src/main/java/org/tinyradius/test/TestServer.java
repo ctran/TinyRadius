@@ -27,6 +27,7 @@ public class TestServer {
 	public static void main(String[] args) throws IOException, Exception {
 		RadiusServer server = new RadiusServer() {
 			// Authorize localhost/testing123
+			@Override
 			public String getSharedSecret(InetSocketAddress client) {
 				if (client.getAddress().getHostAddress().equals("127.0.0.1")) {
 					return "testing123";
@@ -35,6 +36,7 @@ public class TestServer {
 			}
 
 			// Authenticate mw
+			@Override
 			public String getUserPassword(String userName) {
 				if (userName.equals("mw")) {
 					return "test";
@@ -43,6 +45,7 @@ public class TestServer {
 			}
 
 			// Adds an attribute to the Access-Accept packet
+			@Override
 			public RadiusPacket accessRequestReceived(AccessRequest accessRequest, InetSocketAddress client) throws RadiusException {
 				System.out.println("Received Access-Request:\n" + accessRequest);
 				RadiusPacket packet = super.accessRequestReceived(accessRequest, client);

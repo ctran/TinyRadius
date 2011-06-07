@@ -1,24 +1,24 @@
 package org.tinyradius.packet;
 
 import java.security.MessageDigest;
-
 import org.tinyradius.util.RadiusUtil;
 
 /**
  * CoA packet. Thanks to Michael Krastev.
+ * 
  * @author Michael Krastev <mkrastev@gmail.com>
  */
 public class CoaRequest extends RadiusPacket {
 
 	public CoaRequest() {
-		super(COA_REQUEST, getNextPacketIdentifier()); 
+		super(COA_REQUEST, getNextPacketIdentifier());
 	}
-	
+
 	/**
 	 * @see AccountingRequest#updateRequestAuthenticator(String, int, byte[])
 	 */
-	protected byte[] updateRequestAuthenticator(String sharedSecret,
-			int packetLength, byte[] attributes) {
+	@Override
+	protected byte[] updateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes) {
 		byte[] authenticator = new byte[16];
 		for (int i = 0; i < 16; i++)
 			authenticator[i] = 0;
@@ -33,5 +33,5 @@ public class CoaRequest extends RadiusPacket {
 		md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
 		return md5.digest();
 	}
-	
+
 }

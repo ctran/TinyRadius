@@ -8,7 +8,6 @@
 package org.tinyradius.dictionary;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -47,11 +46,11 @@ public class MemoryDictionary implements WritableDictionary {
 	 * @see org.tinyradius.dictionary.Dictionary#getAttributeTypeByCode(int, int)
 	 */
 	public AttributeType getAttributeTypeByCode(int vendorCode, int typeCode) {
-		Map vendorAttributes = (Map) attributesByCode.get(new Integer(vendorCode));
+		Map<Integer, AttributeType> vendorAttributes = attributesByCode.get(new Integer(vendorCode));
 		if (vendorAttributes == null) {
 			return null;
 		}
-		return (AttributeType) vendorAttributes.get(new Integer(typeCode));
+		return vendorAttributes.get(new Integer(typeCode));
 	}
 
 	/**
@@ -63,7 +62,7 @@ public class MemoryDictionary implements WritableDictionary {
 	 * @see org.tinyradius.dictionary.Dictionary#getAttributeTypeByName(java.lang.String)
 	 */
 	public AttributeType getAttributeTypeByName(String typeName) {
-		return (AttributeType) attributesByName.get(typeName);
+		return attributesByName.get(typeName);
 	}
 
 	/**
@@ -76,10 +75,10 @@ public class MemoryDictionary implements WritableDictionary {
 	 * @see org.tinyradius.dictionary.Dictionary#getVendorId(java.lang.String)
 	 */
 	public int getVendorId(String vendorName) {
-		for (Iterator i = vendorsByCode.entrySet().iterator(); i.hasNext();) {
-			Map.Entry e = (Map.Entry) i.next();
-			if (e.getValue().equals(vendorName))
-				return ((Integer) e.getKey()).intValue();
+		for (Map.Entry<Integer, String> e : vendorsByCode.entrySet()) {
+			if (e.getValue().equals(vendorName)) {
+				return (e.getKey()).intValue();
+			}
 		}
 		return -1;
 	}
@@ -94,7 +93,7 @@ public class MemoryDictionary implements WritableDictionary {
 	 * @see org.tinyradius.dictionary.Dictionary#getVendorName(int)
 	 */
 	public String getVendorName(int vendorId) {
-		return (String) vendorsByCode.get(new Integer(vendorId));
+		return vendorsByCode.get(new Integer(vendorId));
 	}
 
 	/**
@@ -136,9 +135,9 @@ public class MemoryDictionary implements WritableDictionary {
 		if (attributesByName.containsKey(attributeName))
 			throw new IllegalArgumentException("duplicate attribute name: " + attributeName);
 
-		Map vendorAttributes = (Map) attributesByCode.get(vendorId);
+		Map<Integer, AttributeType> vendorAttributes = attributesByCode.get(vendorId);
 		if (vendorAttributes == null) {
-			vendorAttributes = new HashMap();
+			vendorAttributes = new HashMap<Integer, AttributeType>();
 			attributesByCode.put(vendorId, vendorAttributes);
 		}
 		if (vendorAttributes.containsKey(typeCode))
@@ -148,8 +147,8 @@ public class MemoryDictionary implements WritableDictionary {
 		vendorAttributes.put(typeCode, attributeType);
 	}
 
-	private Map vendorsByCode = new HashMap(); // <Integer, String>
-	private Map attributesByCode = new HashMap(); // <Integer, <Integer, AttributeType>>
-	private Map attributesByName = new HashMap(); // <String, AttributeType>
+	private Map<Integer, String> vendorsByCode = new HashMap<Integer, String>();
+	private Map<Integer, Map<Integer, AttributeType>> attributesByCode = new HashMap<Integer, Map<Integer, AttributeType>>();
+	private Map<String, AttributeType> attributesByName = new HashMap<String, AttributeType>();
 
 }
