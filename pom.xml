@@ -1,12 +1,16 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.tinyradius</groupId>
     <artifactId>tinyradius</artifactId>
+    <version>1.0.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>TinyRadius Java Radius Library</name>
-    <version>0.9.9</version>
-    <url>http://sourceforge.net/projects/tinyradius</url>
+    <description>
+        TinyRadius is a simple, small and fast Java Radius library capable of sending and receiving Radius packets of all types. It is released under the terms of the LGPL.
+    </description>
+    <url>https://github.com/ctran/TinyRadius</url>
     <developers>
         <developer>
             <id>wuttke</id>
@@ -14,14 +18,18 @@
             <email>mw@teuto.net</email>
             <timezone>CEST</timezone>
         </developer>
+        <developer>
+            <id>ctran</id>
+            <email>cuong.tran@gmail.com</email>
+        </developer>
     </developers>
-    <repositories>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>https://maven2-repository.dev.java.net/nonav/repository</url>
-        </repository>
-    </repositories>
+    <licenses>
+        <license>
+            <name>Lesser General Public License (LGPL)</name>
+            <url>${project.basedir}/LICENSE.txt</url>
+            <distribution>local</distribution>
+        </license>
+    </licenses>
     <dependencies>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -29,7 +37,4 @@
             <version>1.1</version>
         </dependency>
     </dependencies>
-    <build>
-        <sourceDirectory>src</sourceDirectory>        
-    </build>
 </project>
