@@ -3,3 +3,6 @@ dist
 build
 doc/apidoc
 target
+.settings
+.classpath
+.project
