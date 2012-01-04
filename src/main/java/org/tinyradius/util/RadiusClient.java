@@ -70,7 +70,7 @@ public class RadiusClient {
 	 *                retries)
 	 */
 	public synchronized boolean authenticate(String userName, String password) throws IOException, RadiusException {
-		return authenticate(userName, password, AccessRequest.AUTH_PAP);
+		return authenticate(userName, password, authProtocol);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class RadiusClient {
 	 *            user name
 	 * @param password
 	 *            password
-	 * @param authProtocol
+	 * @param protocol
 	 *            either {@link AccessRequest#AUTH_PAP} or {@link AccessRequest#AUTH_CHAP}
 	 * @return true if authentication is successful, false otherwise
 	 * @exception RadiusException
@@ -89,9 +89,9 @@ public class RadiusClient {
 	 *                communication error (after getRetryCount()
 	 *                retries)
 	 */
-	public synchronized boolean authenticate(String userName, String password, String authProtocol) throws IOException, RadiusException {
+	public synchronized boolean authenticate(String userName, String password, String protocol) throws IOException, RadiusException {
 		AccessRequest request = new AccessRequest(userName, password);
-		request.setAuthProtocol(authProtocol);
+		request.setAuthProtocol(protocol);
 		RadiusPacket response = authenticate(request);
 		return response.getPacketType() == RadiusPacket.ACCESS_ACCEPT;
 	}
@@ -148,8 +148,8 @@ public class RadiusClient {
 	 * Closes the socket of this client.
 	 */
 	public void close() {
-		if (socket != null)
-			socket.close();
+		if (serverSocket != null)
+			serverSocket.close();
 	}
 
 	/**
@@ -256,8 +256,8 @@ public class RadiusClient {
 		if (socketTimeout < 1)
 			throw new IllegalArgumentException("socket tiemout must be positive");
 		this.socketTimeout = socketTimeout;
-		if (socket != null)
-			socket.setSoTimeout(socketTimeout);
+		if (serverSocket != null)
+			serverSocket.setSoTimeout(socketTimeout);
 	}
 
 	/**
@@ -279,6 +279,19 @@ public class RadiusClient {
 	 */
 	public int getAcctPort() {
 		return acctPort;
+	}
+
+	/**
+	 * Set the Radius authentication protocol.
+	 * 
+	 * @see AccessRequest#AUTH_CHAP
+	 * @see AccessRequest#AUTH_PAP
+	 * 
+	 * @param protocol
+	 *            the protocol, PAP or CHAP
+	 */
+	public void setAuthProtocol(String protocol) {
+		this.authProtocol = protocol;
 	}
 
 	/**
@@ -353,11 +366,11 @@ public class RadiusClient {
 	 * @throws SocketException
 	 */
 	protected DatagramSocket getSocket() throws SocketException {
-		if (socket == null) {
-			socket = new DatagramSocket();
-			socket.setSoTimeout(getSocketTimeout());
+		if (serverSocket == null) {
+			serverSocket = new DatagramSocket();
+			serverSocket.setSoTimeout(getSocketTimeout());
 		}
-		return socket;
+		return serverSocket;
 	}
 
 	/**
@@ -398,9 +411,10 @@ public class RadiusClient {
 	private int acctPort = 1813;
 	private String hostName = null;
 	private String sharedSecret = null;
-	private DatagramSocket socket = null;
+	private DatagramSocket serverSocket = null;
 	private int retryCount = 3;
 	private int socketTimeout = 3000;
+	private String authProtocol = AccessRequest.AUTH_PAP;
 	private static Log logger = LogFactory.getLog(RadiusClient.class);
 
 }
