@@ -54,5 +54,14 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>org/tinyradius/dictionary/default_dictionary</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>
