@@ -16,6 +16,8 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 import org.tinyradius.attribute.IntegerAttribute;
 import org.tinyradius.attribute.IpAttribute;
+import org.tinyradius.attribute.Ipv6Attribute;
+import org.tinyradius.attribute.Ipv6PrefixAttribute;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.attribute.StringAttribute;
 import org.tinyradius.attribute.VendorSpecificAttribute;
@@ -187,7 +189,7 @@ public class DictionaryParser {
 	 * @param attributeType
 	 * 
 	 * @param typeStr
-	 *            string|octets|integer|date|ipaddr
+	 *            string|octets|integer|date|ipaddr|ipv6addr|ipv6prefix
 	 * @return RadiusAttribute class or descendant
 	 */
 	private static Class getAttributeTypeClass(int attributeType, String typeStr) {
@@ -200,6 +202,10 @@ public class DictionaryParser {
 			type = IntegerAttribute.class;
 		else if (typeStr.equalsIgnoreCase("ipaddr"))
 			type = IpAttribute.class;
+		else if (typeStr.equalsIgnoreCase("ipv6addr"))
+			type = Ipv6Attribute.class;
+		else if (typeStr.equalsIgnoreCase("ipv6prefix"))
+			type = Ipv6PrefixAttribute.class;
 		return type;
 	}
 
