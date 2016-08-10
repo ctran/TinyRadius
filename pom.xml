@@ -54,5 +54,13 @@
                 </executions>
             </plugin>
         </plugins>
+	<resources>
+	      <resource>
+	        <directory>src/main/java</directory>
+	        <includes>
+	          <include>**/default_dictionary</include>
+	        </includes>
+	      </resource>
+    </resources>
     </build>
 </project>
