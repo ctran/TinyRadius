@@ -65,7 +65,7 @@ public class AccountingRequest extends RadiusPacket {
 	 * Radius client.
 	 */
 	public AccountingRequest() {
-		super();
+		super(ACCOUNTING_REQUEST);
 	}
 
 	/**
