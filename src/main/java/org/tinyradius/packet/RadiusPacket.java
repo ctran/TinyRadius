@@ -712,8 +712,8 @@ public class RadiusPacket {
 	}
 
 	/**
-	 * Creates a RadiusPacket object. Depending on the passed type, the
-	 * appropiate successor is chosen. Sets the type, but does not touch
+	 * Creates a RadiusPacket object. Depending on the passed type, an
+	 * appropriate packet is created. Also sets the type, and the
 	 * the packet identifier.
 	 * 
 	 * @param type

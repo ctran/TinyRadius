@@ -36,7 +36,7 @@ public class AccessRequest extends RadiusPacket {
 	 * Constructs an empty Access-Request packet.
 	 */
 	public AccessRequest() {
-		super();
+		super(ACCESS_REQUEST);
 	}
 
 	/**
