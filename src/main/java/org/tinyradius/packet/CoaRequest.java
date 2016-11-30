@@ -11,7 +11,10 @@ import org.tinyradius.util.RadiusUtil;
 public class CoaRequest extends RadiusPacket {
 
 	public CoaRequest() {
-		super(COA_REQUEST, getNextPacketIdentifier()); 
+		this(COA_REQUEST);
+	}
+	public CoaRequest(final int type) {
+		super(type, getNextPacketIdentifier()); 
 	}
 	
 	/**
