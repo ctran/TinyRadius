@@ -46,8 +46,8 @@ ATTRIBUTE	Acct-Output-Octets	43	integer
 ATTRIBUTE	Acct-Session-Id		44	string
 ATTRIBUTE	Acct-Authentic		45	integer
 ATTRIBUTE	Acct-Session-Time	46	integer
-ATTRIBUTE   Acct-Input-Packets	47	integer
-ATTRIBUTE   Acct-Output-Packets	48	integer
+ATTRIBUTE	Acct-Input-Packets	47	integer
+ATTRIBUTE	Acct-Output-Packets	48	integer
 ATTRIBUTE	Acct-Terminate-Cause	49	integer
 ATTRIBUTE	Acct-Multi-Session-Id	50	string
 ATTRIBUTE	Acct-Link-Count		51	integer
@@ -80,7 +80,7 @@ ATTRIBUTE	Framed-IPv6-Prefix	97	ipv6prefix
 ATTRIBUTE	Login-IPv6-Host		98	octets
 ATTRIBUTE	Framed-IPv6-Route	99	string
 ATTRIBUTE	Framed-IPv6-Pool	100	string
-ATTRIBUTE	Error-Cause	101	integer
+ATTRIBUTE	Error-Cause		101	integer
 ATTRIBUTE	Framed-IPv6-Address	168	ipv6addr
 ATTRIBUTE	DNS-Server-IPv6-Address	169	ipv6addr
 ATTRIBUTE	Route-IPv6-Information	170	octets
@@ -234,6 +234,23 @@ VALUE		Acct-Terminate-Cause	Port-Disabled		22
 
 VALUE		Prompt			No-Echo			0
 VALUE		Prompt			Echo			1
+
+
+VALUE		Error-Cause		Residual-Context-Removed	201
+VALUE		Error-Cause		Invalid-EAP-Packet		202
+VALUE		Error-Cause		Unsupported-Attribute		401
+VALUE		Error-Cause		Missing-Attribute		402
+VALUE		Error-Cause		NAS-Identification-Mismatch	403
+VALUE		Error-Cause		Invalid-Request			404
+VALUE		Error-Cause		Unsupported-Service		405
+VALUE		Error-Cause		Unsupported-Extension		406
+VALUE		Error-Cause		Administratively-Prohibited	501
+VALUE		Error-Cause		Proxy-Request-Not-Routable	502
+VALUE		Error-Cause		Session-Context-Not-Found	503
+VALUE		Error-Cause		Session-Context-Not-Removable	504
+VALUE		Error-Cause		Proxy-Processing-Error		505
+VALUE		Error-Cause		Resources-Unavailable		506
+VALUE		Error-Cause		Request-Initiated		507
 
 #       Wi-Fi Alliance - Wireless ISP Roaming - Best Current Practices v1,
 #       Feb 2003, p 14
