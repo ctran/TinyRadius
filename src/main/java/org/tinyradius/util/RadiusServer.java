@@ -46,6 +46,25 @@ public abstract class RadiusServer {
 	public abstract String getSharedSecret(InetSocketAddress client);
 
 	/**
+	 * Returns the shared secret used to communicate with the client with the
+	 * passed IP address and the received packet data or null if the client 
+	 * is not allowed at this server.
+	 *
+	 * for compatiblity this standard implementation just call the getSharedSecret(InetSocketAddress) method
+	 * and should be overrived when necessary
+	 * 
+	 * @param client
+	 *            IP address and port number of client
+	 * @param packet
+	 *            packet received from client, the packettype comes as RESERVED, 
+	 *	      because for some packets the secret is necessary for decoding
+	 * @return shared secret or null
+	 */
+	public String getSharedSecret(InetSocketAddress client, RadiusPacket packet) {
+		return getSharedSecret(client);
+	}
+
+	/**
 	 * Returns the password of the passed user. Either this
 	 * method or accessRequestReceived() should be overriden.
 	 * 
@@ -353,7 +372,7 @@ public abstract class RadiusServer {
 				// check client
 				InetSocketAddress localAddress = (InetSocketAddress) s.getLocalSocketAddress();
 				InetSocketAddress remoteAddress = new InetSocketAddress(packetIn.getAddress(), packetIn.getPort());
-				String secret = getSharedSecret(remoteAddress);
+				String secret = getSharedSecret(remoteAddress, makeRadiusPacket(packetIn, "1234567890", RadiusPacket.RESERVED));
 				if (secret == null) {
 					if (logger.isInfoEnabled())
 						logger.info("ignoring packet from unknown client " + remoteAddress + " received on local address " + localAddress);
@@ -361,7 +380,7 @@ public abstract class RadiusServer {
 				}
 
 				// parse packet
-				RadiusPacket request = makeRadiusPacket(packetIn, secret);
+				RadiusPacket request = makeRadiusPacket(packetIn, secret, RadiusPacket.UNDEFINED);
 				if (logger.isInfoEnabled())
 					logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
 
@@ -511,9 +530,9 @@ public abstract class RadiusServer {
 	 *                communication error (after getRetryCount()
 	 *                retries)
 	 */
-	protected RadiusPacket makeRadiusPacket(DatagramPacket packet, String sharedSecret) throws IOException, RadiusException {
+	protected RadiusPacket makeRadiusPacket(DatagramPacket packet, String sharedSecret, int forceType) throws IOException, RadiusException {
 		ByteArrayInputStream in = new ByteArrayInputStream(packet.getData());
-		return RadiusPacket.decodeRequestPacket(in, sharedSecret);
+		return RadiusPacket.decodeRequestPacket(in, sharedSecret, forceType);
 	}
 
 	/**

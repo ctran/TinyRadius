@@ -60,6 +60,7 @@ public class RadiusPacket {
 	public static final int STATUS_ACCEPT = 47;
 	public static final int STATUS_REJECT = 48;
 	public static final int RESERVED = 255;
+	public static final int UNDEFINED = 0;
 
 	/**
 	 * Maximum packet length.
@@ -627,6 +628,10 @@ public class RadiusPacket {
 		return decodePacket(DefaultDictionary.getDefaultDictionary(), in, sharedSecret, null);
 	}
 
+	public static RadiusPacket decodeRequestPacket(InputStream in, String sharedSecret, int forceType) throws IOException, RadiusException {
+		return decodePacket(DefaultDictionary.getDefaultDictionary(), in, sharedSecret, null, forceType);
+	}
+
 	/**
 	 * Reads a Radius response packet from the given input stream and
 	 * creates an appropiate RadiusPacket descendant object.
@@ -963,6 +968,12 @@ public class RadiusPacket {
 	 *                if the Radius packet is malformed
 	 */
 	protected static RadiusPacket decodePacket(Dictionary dictionary, InputStream in, String sharedSecret, RadiusPacket request) throws IOException,
+		RadiusException {
+		return decodePacket(dictionary, in, sharedSecret, request, UNDEFINED);
+	}
+	
+	public static RadiusPacket decodePacket(Dictionary dictionary, InputStream in, 
+		String sharedSecret, RadiusPacket request, int forceType) throws IOException,
 	        RadiusException {
 		// check shared secret
 		if (sharedSecret == null || sharedSecret.length() == 0)
@@ -1007,7 +1018,7 @@ public class RadiusPacket {
 			throw new RadiusException("bad packet: attribute length mismatch");
 
 		// create RadiusPacket object; set properties
-		RadiusPacket rp = createRadiusPacket(type);
+		RadiusPacket rp = createRadiusPacket((forceType == UNDEFINED) ? type : forceType);
 		rp.setPacketType(type);
 		rp.setPacketIdentifier(identifier);
 		rp.authenticator = authenticator;
@@ -1124,7 +1135,7 @@ public class RadiusPacket {
 	/**
 	 * Type of this Radius packet.
 	 */
-	private int packetType = 0;
+	private int packetType = UNDEFINED;
 
 	/**
 	 * Identifier of this packet.
