@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tinyradius.attribute.RadiusAttribute;
@@ -35,6 +36,11 @@ import org.tinyradius.packet.RadiusPacket;
  */
 public abstract class RadiusServer {
 
+	/**
+	 * Define this executor in child class to make packet processing be made in separate threads
+	 */
+	protected ExecutorService executor = null;
+	
 	/**
 	 * Returns the shared secret used to communicate with the client with the
 	 * passed IP address or null if the client is not allowed at this server.
@@ -175,6 +181,8 @@ public abstract class RadiusServer {
 	public void stop() {
 		logger.info("stopping Radius server");
 		closing = true;
+		if (executor != null) 
+			executor.shutdown();
 		if (authSocket != null)
 			authSocket.close();
 		if (acctSocket != null)
@@ -347,10 +355,10 @@ public abstract class RadiusServer {
 	 * @param s
 	 *            socket to listen on
 	 */
-	protected void listen(DatagramSocket s) {
-		DatagramPacket packetIn = new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
+	protected void listen(final DatagramSocket s) {
 		while (true) {
 			try {
+				final DatagramPacket packetIn = new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
 				// receive packet
 				try {
 					logger.trace("about to call socket.receive()");
@@ -369,34 +377,19 @@ public abstract class RadiusServer {
 					continue;
 				}
 
-				// check client
-				InetSocketAddress localAddress = (InetSocketAddress) s.getLocalSocketAddress();
-				InetSocketAddress remoteAddress = new InetSocketAddress(packetIn.getAddress(), packetIn.getPort());
-				String secret = getSharedSecret(remoteAddress, makeRadiusPacket(packetIn, "1234567890", RadiusPacket.RESERVED));
-				if (secret == null) {
-					if (logger.isInfoEnabled())
-						logger.info("ignoring packet from unknown client " + remoteAddress + " received on local address " + localAddress);
-					continue;
+				if (executor == null) {
+					processRequest(s, packetIn);
 				}
-
-				// parse packet
-				RadiusPacket request = makeRadiusPacket(packetIn, secret, RadiusPacket.UNDEFINED);
-				if (logger.isInfoEnabled())
-					logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
-
-				// handle packet
-				logger.trace("about to call RadiusServer.handlePacket()");
-				RadiusPacket response = handlePacket(localAddress, remoteAddress, request, secret);
-
-				// send response
-				if (response != null) {
-					if (logger.isInfoEnabled())
-						logger.info("send response: " + response);
-					DatagramPacket packetOut = makeDatagramPacket(response, secret, remoteAddress.getAddress(), packetIn.getPort(), request);
-					s.send(packetOut);
+				else {
+					executor.submit(new Runnable() {
+						
+						@Override
+						public void run() {
+							processRequest(s, packetIn);
+						}
+						
+					});
 				}
-				else
-					logger.info("no response sent");
 			}
 			catch (SocketTimeoutException ste) {
 				// this is expected behaviour
@@ -406,10 +399,56 @@ public abstract class RadiusServer {
 				// error while reading/writing socket
 				logger.error("communication error", ioe);
 			}
-			catch (RadiusException re) {
-				// malformed packet
-				logger.error("malformed Radius packet", re);
+		}
+	}
+
+
+	/**
+	 * Process a single received request
+	 * 
+	 * @param s
+	 *            socket to send response on
+	 * @param packetIn
+	 *		data packet 
+	 */
+	protected void processRequest(final DatagramSocket s, final DatagramPacket packetIn) {
+		try {
+			// check client
+			final InetSocketAddress localAddress = (InetSocketAddress) s.getLocalSocketAddress();
+			final InetSocketAddress remoteAddress = new InetSocketAddress(packetIn.getAddress(), packetIn.getPort());
+			final String secret = getSharedSecret(remoteAddress, makeRadiusPacket(packetIn, "1234567890", RadiusPacket.RESERVED));
+			if (secret == null) {
+				if (logger.isInfoEnabled())
+					logger.info("ignoring packet from unknown client " + remoteAddress + " received on local address " + localAddress);
+				return;
 			}
+
+			// parse packet
+			final RadiusPacket request = makeRadiusPacket(packetIn, secret, RadiusPacket.UNDEFINED);
+			if (logger.isInfoEnabled())
+				logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
+
+			// handle packet
+			logger.trace("about to call RadiusServer.handlePacket()");
+			final RadiusPacket response = handlePacket(localAddress, remoteAddress, request, secret);
+
+			// send response
+			if (response != null) {
+				if (logger.isInfoEnabled())
+					logger.info("send response: " + response);
+				final DatagramPacket packetOut = makeDatagramPacket(response, secret, remoteAddress.getAddress(), packetIn.getPort(), request);
+				s.send(packetOut);
+			}
+			else
+				logger.info("no response sent");
+		}
+		catch (IOException ioe) {
+			// error while reading/writing socket
+			logger.error("communication error", ioe);
+		}
+		catch (RadiusException re) {
+			// malformed packet
+			logger.error("malformed Radius packet", re);
 		}
 	}
 
