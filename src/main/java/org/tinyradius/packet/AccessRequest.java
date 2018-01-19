@@ -261,11 +261,11 @@ public class AccessRequest extends RadiusPacket {
 			md5.update(i == 0 ? getAuthenticator() : lastBlock);
 			byte bn[] = md5.digest();
 
-			System.arraycopy(encryptedPass, i, lastBlock, 0, 16);
-
 			// perform the XOR as specified by RFC 2865.
 			for (int j = 0; j < 16; j++)
 				encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
+
+			System.arraycopy(encryptedPass, i, lastBlock, 0, 16);
 		}
 
 		return encryptedPass;
