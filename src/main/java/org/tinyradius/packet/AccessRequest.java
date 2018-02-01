@@ -245,29 +245,29 @@ public class AccessRequest extends RadiusPacket {
 			encryptedPass = new byte[128];
 		}
 
-		// copy the userPass into the encrypted pass and then fill it out with zeroes
+		// copy the userPass into the encrypted pass and then fill it out with zeroes by default.
 		System.arraycopy(userPassBytes, 0, encryptedPass, 0, userPassBytes.length);
-		for (int i = userPassBytes.length; i < encryptedPass.length; i++) {
-			encryptedPass[i] = 0;
-		}
 
 		// digest shared secret and authenticator
 		MessageDigest md5 = getMd5Digest();
-		byte[] lastBlock = new byte[16];
 
+		// According to section-5.2 in RFC 2865, when the password is longer than 16
+		// characters: c(i) = pi xor (MD5(S + c(i-1)))
 		for (int i = 0; i < encryptedPass.length; i += 16) {
 			md5.reset();
 			md5.update(sharedSecret);
-			md5.update(i == 0 ? getAuthenticator() : lastBlock);
-			byte bn[] = md5.digest();
+			if (i == 0) {
+				md5.update(getAuthenticator());
+			} else {
+				md5.update(encryptedPass, i - 16, 16);
+			}
 
-			System.arraycopy(encryptedPass, i, lastBlock, 0, 16);
+			byte bn[] = md5.digest();
 
 			// perform the XOR as specified by RFC 2865.
 			for (int j = 0; j < 16; j++)
 				encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
 		}
-
 		return encryptedPass;
 	}
 
