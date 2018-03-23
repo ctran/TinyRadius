@@ -1,5 +1,6 @@
-
-TinyRadius README [![Build Status](https://travis-ci.org/ctran/TinyRadius.svg?branch=master)](https://travis-ci.org/ctran/TinyRadius)
+[![Build Status](https://travis-ci.org/ctran/TinyRadius.svg?branch=master)](https://travis-ci.org/ctran/TinyRadius)
+ 
+TinyRadius README
 
 TinyRadius is a simple, small and fast Java Radius library capable of
 sending and receiving Radius packets of all types. It is released
