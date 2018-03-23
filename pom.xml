@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.tinyradius</groupId>
 	<artifactId>tinyradius</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 	<name>TinyRadius Java Radius Library</name>
 	<description>
