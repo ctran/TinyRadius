@@ -8,6 +8,7 @@ variables:
 
 stages:
   - build
+  - package
 
 maven-build:
   image: maven:3-jdk-8
@@ -16,3 +17,9 @@ maven-build:
   artifacts:
     paths:
       - target/*.jar
+      
+docker-build:
+  stage: package
+  script:
+  - docker build -t registry.gitlab.com/ctran/TinyRadius .
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
