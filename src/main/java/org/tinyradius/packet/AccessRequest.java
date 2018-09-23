@@ -9,7 +9,11 @@ package org.tinyradius.packet;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tinyradius.attribute.RadiusAttribute;
@@ -32,6 +36,17 @@ public class AccessRequest extends RadiusPacket {
 	 */
 	public static final String AUTH_CHAP = "chap";
 
+	/**
+	 * Microsoft Challenged Handshake Authentication Protocol V2
+	 */
+	public static final String AUTH_MS_CHAP_V2 = "mschapv2";
+	/**
+	 * Extended Authentication Protocol
+	 */
+	public static final String AUTH_EAP = "eap";
+
+	public static final Set AUTH_PROTOCOLS = new HashSet(Arrays.asList(AUTH_PAP, AUTH_CHAP, AUTH_MS_CHAP_V2, AUTH_EAP));
+	
 	/**
 	 * Constructs an empty Access-Request packet.
 	 */
@@ -125,10 +140,10 @@ public class AccessRequest extends RadiusPacket {
 	 *            AUTH_PAP or AUTH_CHAP
 	 */
 	public void setAuthProtocol(String authProtocol) {
-		if (authProtocol != null && (authProtocol.equals(AUTH_PAP) || authProtocol.equals(AUTH_CHAP)))
+		if (authProtocol != null && AUTH_PROTOCOLS.contains(authProtocol))
 			this.authProtocol = authProtocol;
 		else
-			throw new IllegalArgumentException("protocol must be pap or chap");
+			throw new IllegalArgumentException("protocol must be in " + AUTH_PROTOCOLS);
 	}
 
 	/**
@@ -144,6 +159,10 @@ public class AccessRequest extends RadiusPacket {
 			throw new IllegalArgumentException("password is empty");
 		if (getAuthProtocol().equals(AUTH_CHAP))
 			return verifyChapPassword(plaintext);
+		if (getAuthProtocol().equals(AUTH_MS_CHAP_V2))
+			throw new RadiusException(AUTH_MS_CHAP_V2 + " verification not supported yet");
+		if (getAuthProtocol().equals(AUTH_EAP))
+			throw new RadiusException(AUTH_EAP + " verification not supported yet");
 		return getUserPassword().equals(plaintext);
 	}
 
@@ -157,7 +176,9 @@ public class AccessRequest extends RadiusPacket {
 		RadiusAttribute userPassword = getAttribute(USER_PASSWORD);
 		RadiusAttribute chapPassword = getAttribute(CHAP_PASSWORD);
 		RadiusAttribute chapChallenge = getAttribute(CHAP_CHALLENGE);
-
+		RadiusAttribute msChapChallenge = getAttribute(MICROSOFT, MS_CHAP_CHALLENGE);
+		RadiusAttribute msChap2Response = getAttribute(MICROSOFT, MS_CHAP2_RESPONSE);
+		List<RadiusAttribute> eapMessage = getAttributes(EAP_MESSAGE);
 		if (userPassword != null) {
 			setAuthProtocol(AUTH_PAP);
 			this.password = decodePapPassword(userPassword.getAttributeData(), RadiusUtil.getUtf8Bytes(sharedSecret));
@@ -174,6 +195,14 @@ public class AccessRequest extends RadiusPacket {
 			setAuthProtocol(AUTH_CHAP);
 			this.chapPassword = chapPassword.getAttributeData();
 			this.chapChallenge = getAuthenticator();
+		}
+		else if (msChapChallenge != null && msChap2Response != null) {
+			setAuthProtocol(AUTH_MS_CHAP_V2);
+			this.chapPassword = msChap2Response.getAttributeData();
+			this.chapChallenge = msChapChallenge.getAttributeData();
+		}
+		else if (eapMessage.size() > 0) {
+			setAuthProtocol(AUTH_EAP);
 		}
 		else
 			throw new RadiusException("Access-Request: User-Password or CHAP-Password/CHAP-Challenge missing");
@@ -202,6 +231,12 @@ public class AccessRequest extends RadiusPacket {
 			removeAttributes(CHAP_CHALLENGE);
 			addAttribute(new RadiusAttribute(CHAP_PASSWORD, pass));
 			addAttribute(new RadiusAttribute(CHAP_CHALLENGE, challenge));
+		}
+		else if (getAuthProtocol().equals(AUTH_MS_CHAP_V2)) {
+			throw new RuntimeException("encoding not supported for " + AUTH_MS_CHAP_V2); 
+		}
+		else if (getAuthProtocol().equals(AUTH_EAP)) {
+			throw new RuntimeException("encoding not supported for " + AUTH_EAP); 
 		}
 	}
 
@@ -423,6 +458,22 @@ public class AccessRequest extends RadiusPacket {
 	 * Radius attribute type for CHAP-Challenge attribute.
 	 */
 	private static final int CHAP_CHALLENGE = 60;
+	/**
+	 * Radius attribute type for EAP-Message attribute.
+	 */
+	private static final int EAP_MESSAGE = 79;
+	/**
+	 * Vendor id for Microsoft
+	 */
+	private static final int MICROSOFT = 311;
+	/**
+	 * Radius attribute type for MS-CHAP-Challenge attribute.
+	 */
+	private static final int MS_CHAP_CHALLENGE = 11;
+	/**
+	 * Radius attribute type for MS-CHAP-Challenge attribute.
+	 */
+	private static final int MS_CHAP2_RESPONSE = 25;
 
 	/**
 	 * Logger for logging information about malformed packets
