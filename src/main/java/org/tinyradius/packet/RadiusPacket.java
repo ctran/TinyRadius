@@ -651,7 +651,7 @@ public class RadiusPacket {
 	public static RadiusPacket decodeResponsePacket(InputStream in, String sharedSecret, RadiusPacket request) throws IOException, RadiusException {
 		if (request == null)
 			throw new NullPointerException("request may not be null");
-		return decodePacket(DefaultDictionary.getDefaultDictionary(), in, sharedSecret, request);
+		return decodePacket(request.getDictionary(), in, sharedSecret, request);
 	}
 
 	/**
@@ -1019,6 +1019,7 @@ public class RadiusPacket {
 
 		// create RadiusPacket object; set properties
 		RadiusPacket rp = createRadiusPacket((forceType == UNDEFINED) ? type : forceType);
+		rp.setDictionary(dictionary);
 		rp.setPacketType(type);
 		rp.setPacketIdentifier(identifier);
 		rp.authenticator = authenticator;
