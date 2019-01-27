@@ -1,0 +1,40 @@
+# -*- text -*-
+# Copyright (C) 2015 The FreeRADIUS Server project and contributors
+##############################################################################
+#
+#	Fortinet's VSA's
+#	As posted to the list by Richie Lee.
+#
+#	http://kb.fortinet.com/kb/viewContent.do?externalId=FD36919&sliceId=1
+#
+#	$Id$
+#
+##############################################################################
+
+#
+#	Fortinet's VSA's
+#
+
+VENDOR		12356			Fortinet
+
+VENDORATTR	12356	Fortinet-Group-Name						1	string
+VENDORATTR	12356	Fortinet-Client-IP-Address				2	ipaddr
+VENDORATTR	12356	Fortinet-Vdom-Name						3	string
+VENDORATTR	12356	Fortinet-Client-IPv6-Address			4	octets
+VENDORATTR	12356	Fortinet-Interface-Name					5	string
+VENDORATTR	12356	Fortinet-Access-Profile					6	string
+VENDORATTR	12356	Fortinet-FAC-Auth-Status				11	string
+VENDORATTR	12356	Fortinet-FAC-Token-ID					12	string
+VENDORATTR	12356	Fortinet-FAC-Challenge-Code				15	string
+VENDORATTR	12356	Fortinet-Webfilter-Category-Allow		16	octets
+VENDORATTR	12356	Fortinet-Webfilter-Category-Block		17	octets
+VENDORATTR	12356	Fortinet-Webfilter-Category-Monitor		18	octets
+VENDORATTR	12356	Fortinet-AppCtrl-Category-Allow			19	octets
+VENDORATTR	12356	Fortinet-AppCtrl-Category-Block			20	octets
+VENDORATTR	12356	Fortinet-AppCtrl-Risk-Allow				21	octets
+VENDORATTR	12356	Fortinet-AppCtrl-Risk-Block				22	octets
+VENDORATTR	12356	Fortinet-WirelessController-Device-MAC	23	ether
+VENDORATTR	12356	Fortinet-WirelessController-WTP-ID		24	string
+VENDORATTR	12356	Fortinet-WirelessController-Assoc-Time	25	date
+VENDORATTR	12356	Fortinet-FWN-AVPair						26	string
+
