@@ -58,6 +58,9 @@ VALUE	3GPP-RAT-Type			HSPA-Evolution	5
 VALUE	3GPP-RAT-Type			EUTRAN			6
 VALUE	3GPP-RAT-Type			Virtual			7
 VALUE	3GPP-RAT-Type			EUTRAN-NB-IoT	8
+VALUE	3GPP-RAT-Type			LTE-M			9
+VALUE	3GPP-RAT-Type			5G-New-Radio	10
+VALUE	3GPP-RAT-Type			NG-RAN			51
 VALUE	3GPP-RAT-Type			IEEE-802.16e	101
 VALUE	3GPP-RAT-Type			3GPP2-eHRPD		102
 VALUE	3GPP-RAT-Type			3GPP2-HRPD		103
@@ -68,3 +71,8 @@ VALUE	3GPP-Allocate-IP-Type		Allocate-IPv4-Address	1
 VALUE	3GPP-Allocate-IP-Type		Allocate-IPv6-Prefix	2
 VALUE	3GPP-Allocate-IP-Type		Allocate-IPv4-and-IPv6	3
 
+
+VALUE	3GPP-PDP-Type			IPv4			0
+VALUE	3GPP-PDP-Type			PPP				1
+VALUE	3GPP-PDP-Type			IPv6			2
+VALUE	3GPP-PDP-Type			IPv4v6			3
