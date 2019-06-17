@@ -45,7 +45,7 @@ extends MemoryDictionary{
 		try {
 			instance = new DefaultDictionary();
 			ClassLoader classLoader = DefaultDictionary.class.getClassLoader();
-			InputStream source = classLoader.getResourceAsStream("default_dictionary");
+			InputStream source = classLoader.getResourceAsStream("tinyradius_dictionary");
 			if (source == null) {
 				source = classLoader.getResourceAsStream(DICTIONARY_RESOURCE);
 			}
