@@ -30,6 +30,11 @@
 			<distribution>local</distribution>
 		</license>
 	</licenses>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>6</maven.compiler.source>
+		<maven.compiler.target>6</maven.compiler.target>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>
