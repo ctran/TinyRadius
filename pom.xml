@@ -71,8 +71,23 @@
 	<distributionManagement>
 		<repository>
 			<id>ctran-maven-repo</id>
-			<name>ctran-maven</name>
 			<url>https://api.bintray.com/maven/ctran/maven/tinyradius/;publish=1</url>
 		</repository>
 	</distributionManagement>
+	
+	<profiles>
+		<profile>
+			<id>gh-packages</id>
+			<activation></activation>
+			<property>
+                        	<name>registry</name>
+                        </property>
+			<distributionManagement>
+				<repository>
+					<id>ctran-maven-repo</id>
+					<url>${registry}</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 </project>
