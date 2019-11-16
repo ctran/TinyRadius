@@ -80,11 +80,12 @@
 			<id>gh-packages</id>
 			<activation>
 				<property>
-                	        	<name>registry</name>
+                	        	<name>gh.registry</name>
+					<value>true</value>
         	                </property>
 			</activation>
 			<properties>
-				<altDeploymentRepository>ctran-maven-repo::default::${registry}</altDeploymentRepository>
+				<altDeploymentRepository>ctran-maven-repo::default::https://maven.pkg.github.com/ctran/TinyRadius</altDeploymentRepository>
 			</properties>
 		</profile>
 	</profiles>
