@@ -83,12 +83,9 @@
                 	        	<name>registry</name>
         	                </property>
 			</activation>
-			<distributionManagement>
-				<repository>
-					<id>ctran-maven-repo</id>
-					<url>${registry}</url>
-				</repository>
-			</distributionManagement>
+			<properties>
+				<altDeploymentRepository>ctran-maven-repo::default::${registry}</altDeploymentRepository>
+			</properties>
 		</profile>
 	</profiles>
 </project>
