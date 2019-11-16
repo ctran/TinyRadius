@@ -16,4 +16,4 @@ jobs:
     - name: Build with Maven
       run: mvn -V -B package --file pom.xml
     - name: Deploy
-      run: mvn -V -B deploy -Dregistry=https://maven.pkg.github.com/ctran -Dtoken={{secrets.GITHUB_TOKEN}}
+      run: mvn -V -B deploy -Dgh.registry=true -Dtoken={{secrets.GITHUB_TOKEN}}
