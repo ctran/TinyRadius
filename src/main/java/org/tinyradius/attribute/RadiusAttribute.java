@@ -77,8 +77,9 @@ public class RadiusAttribute {
 	 *            type code, 0-255
 	 */
 	public void setAttributeType(int attributeType) {
-		if (attributeType < 0 || attributeType > 255)
-			throw new IllegalArgumentException("attribute type invalid: " + attributeType);
+                // Vendor specific attribute has values > 255 and < 1
+		/*if (attributeType < 0 || attributeType > 255)
+			throw new IllegalArgumentException("attribute type invalid: " + attributeType);*/
 		this.attributeType = attributeType;
 	}
 
@@ -166,6 +167,28 @@ public class RadiusAttribute {
 	}
 
 	/**
+	 * Returns this attribute encoded as a byte array.
+	 * 
+	 * @return attribute
+	 */
+	public byte[] write2ByteAttribute() {
+		if (getAttributeType() == -1)
+			throw new IllegalArgumentException("attribute type not set");
+		if (attributeData == null)
+			throw new NullPointerException("attribute data not set");
+
+		byte[] attr = new byte[4 + attributeData.length];
+		attr[0] = (byte) (getAttributeType() >> 8 & 0x0ff);
+		attr[1] = (byte) (getAttributeType() & 0x0ff);
+                int data_length = 2 + attributeData.length;
+		attr[2] = (byte) (data_length >> 8 & 0x0ff);
+		attr[3] = (byte) (data_length & 0x0ff);
+		System.arraycopy(attributeData, 0, attr, 4, attributeData.length);
+		return attr;
+	}
+
+
+	/**
 	 * Reads in this attribute from the passed byte array.
 	 * 
 	 * @param data
@@ -180,6 +203,28 @@ public class RadiusAttribute {
 		setAttributeType(attrType);
 		setAttributeData(attrData);
 	}
+
+	/**
+	 * Reads in this attribute from the passed byte array.
+	 * 
+	 * @param data
+	 */
+	public void read2ByteAttribute(byte[] data, int offset, int length) throws RadiusException {
+		if (length < 2)
+			throw new RadiusException("attribute length too small: " + length);
+                int attrType = (usByteToInt(data[offset]) << 8 | usByteToInt(data[offset + 1]));
+                int attrLen = (usByteToInt(data[offset + 2]) << 8 | usByteToInt(data[offset + 3]));
+		byte[] attrData = new byte[attrLen - 4];
+		System.arraycopy(data, offset + 4, attrData, 0, attrLen - 4);
+		setAttributeType(attrType);
+		setAttributeData(attrData);
+	}
+
+        private static int usByteToInt(byte b) {
+                return b & 0xFF;
+        }
+
+
 
 	/**
 	 * String representation for debugging purposes.

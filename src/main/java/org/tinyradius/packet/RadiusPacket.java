@@ -215,8 +215,10 @@ public class RadiusPacket {
 	 *            packet type, 0-255
 	 */
 	public void setPacketType(int type) {
+                // Vendor specific attribute has values > 255 and < 1
+                /*
 		if (type < 1 || type > 255)
-			throw new IllegalArgumentException("packet type out of bounds");
+			throw new IllegalArgumentException("packet type out of bounds");*/
 		this.packetType = type;
 	}
 
@@ -325,8 +327,10 @@ public class RadiusPacket {
 	 *            attribute type to remove
 	 */
 	public void removeAttributes(int type) {
+                // Vendor specific attribute has values > 255 and < 1
+                /*
 		if (type < 1 || type > 255)
-			throw new IllegalArgumentException("attribute type out of bounds");
+			throw new IllegalArgumentException("attribute type out of bounds");*/
 
 		Iterator i = attributes.iterator();
 		while (i.hasNext()) {
@@ -393,8 +397,10 @@ public class RadiusPacket {
 	 * @return list of RadiusAttribute objects, does not return null
 	 */
 	public List getAttributes(int attributeType) {
+                // Vendor specific attribute has values > 255 and < 1
+                /*
 		if (attributeType < 1 || attributeType > 255)
-			throw new IllegalArgumentException("attribute type out of bounds");
+			throw new IllegalArgumentException("attribute type out of bounds");*/
 
 		LinkedList result = new LinkedList();
 		for (Iterator i = attributes.iterator(); i.hasNext();) {
