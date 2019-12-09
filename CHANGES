@@ -1,5 +1,8 @@
 TinyRadius Change Log
 
+1.1.2:
+Support of 2 byte attribute tag length
+
 Plans for 1.0: Asynchronous Radius client (see TODO)
 
 0.9.9:
