@@ -286,7 +286,16 @@ public abstract class RadiusServer {
 		this.duplicateInterval = duplicateInterval;
 	}
 
-	/**
+    /**
+     * Returns a list containing received packets
+     *
+     * @return list of received packets
+     */
+    public List getReceivedPackets() {
+        return receivedPackets;
+    }
+
+    /**
 	 * Returns the IP address the server listens on.
 	 * Returns null if listening on the wildcard address.
 	 * 
