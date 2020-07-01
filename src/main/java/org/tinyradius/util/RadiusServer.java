@@ -602,30 +602,30 @@ public abstract class RadiusServer {
 
 		byte[] authenticator = packet.getAuthenticator();
 
-        String uniqueKey = address.getAddress().getHostAddress() +
-                packet.getPacketIdentifier() +
-                Arrays.toString(packet.getAuthenticator());
+		String uniqueKey = address.getAddress().getHostAddress() +
+			packet.getPacketIdentifier() +
+                	Arrays.toString(packet.getAuthenticator());
 
-        synchronized (receivedPackets) {
-            if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
-                lastClean = now;
-                for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
-                    Long receiveTime = i.next().getValue();
-                    if (receiveTime < intervalStart) {
-                        // packet is older than duplicate interval
-                        i.remove();
-                    }
-                }
-            }
-        }
+		synchronized (receivedPackets) {
+		    if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
+			lastClean = now;
+			for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
+			    Long receiveTime = i.next().getValue();
+			    if (receiveTime < intervalStart) {
+				// packet is older than duplicate interval
+				i.remove();
+			    }
+			}
+		    }
+		}
 
-        Long receiveTime = receivedPackets.get(uniqueKey);
-        if (receiveTime == null) {
-            receivedPackets.put(uniqueKey, System.currentTimeMillis());
-            return false;
-        } else {
-            return !(receiveTime < intervalStart);
-        }
+		Long receiveTime = receivedPackets.get(uniqueKey);
+		if (receiveTime == null) {
+		    receivedPackets.put(uniqueKey, System.currentTimeMillis());
+		    return false;
+		} else {
+		    return !(receiveTime < intervalStart);
+		}
 	}
 
 	private InetAddress listenAddress = null;
@@ -634,8 +634,8 @@ public abstract class RadiusServer {
 	private DatagramSocket authSocket = null;
 	private DatagramSocket acctSocket = null;
 	private int socketTimeout = 3000;
-    private HashMap<String, Long> receivedPackets = new HashMap<>();
-    private long lastClean;
+	private HashMap<String, Long> receivedPackets = new HashMap<>();
+	private long lastClean;
 	private long duplicateInterval = 30000; // 30 s
 	protected transient boolean closing = false;
 	private static Log logger = LogFactory.getLog(RadiusServer.class);
