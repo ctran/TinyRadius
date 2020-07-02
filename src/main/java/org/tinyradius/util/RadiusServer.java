@@ -18,7 +18,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -607,7 +606,7 @@ public abstract class RadiusServer {
                 	Arrays.toString(packet.getAuthenticator());
 
 		synchronized (receivedPackets) {
-		    if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
+			if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
 			lastClean = now;
 			for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
 			    Long receiveTime = i.next().getValue();
@@ -616,15 +615,14 @@ public abstract class RadiusServer {
 				i.remove();
 			    }
 			}
-		    }
-		}
-
-		Long receiveTime = receivedPackets.get(uniqueKey);
-		if (receiveTime == null) {
-		    receivedPackets.put(uniqueKey, System.currentTimeMillis());
-		    return false;
-		} else {
-		    return !(receiveTime < intervalStart);
+			
+			Long receiveTime = receivedPackets.get(uniqueKey);
+			if (receiveTime == null) {
+			    receivedPackets.put(uniqueKey, System.currentTimeMillis());
+			    return false;
+			} else {
+			    return !(receiveTime < intervalStart);
+			}
 		}
 	}
 
