@@ -601,27 +601,28 @@ public abstract class RadiusServer {
 
 		byte[] authenticator = packet.getAuthenticator();
 
-		String uniqueKey = address.getAddress().getHostAddress() +
-			packet.getPacketIdentifier() +
-                	Arrays.toString(packet.getAuthenticator());
+		String uniqueKey = address.getAddress().getHostAddress()+ 
+			packet.getPacketIdentifier() + 
+			Arrays.toString(packet.getAuthenticator());
 
 		synchronized (receivedPackets) {
 			if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
-			lastClean = now;
-			for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
-			    Long receiveTime = i.next().getValue();
-			    if (receiveTime < intervalStart) {
-				// packet is older than duplicate interval
-				i.remove();
-			    }
+				lastClean = now;
+				for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
+					Long receiveTime = i.next().getValue();
+					if (receiveTime < intervalStart) {
+						// packet is older than duplicate interval
+						i.remove();
+					}
+				}
 			}
-			
+
 			Long receiveTime = receivedPackets.get(uniqueKey);
 			if (receiveTime == null) {
-			    receivedPackets.put(uniqueKey, System.currentTimeMillis());
-			    return false;
+				receivedPackets.put(uniqueKey, System.currentTimeMillis());
+				return false;
 			} else {
-			    return !(receiveTime < intervalStart);
+				return !(receiveTime < intervalStart);
 			}
 		}
 	}
