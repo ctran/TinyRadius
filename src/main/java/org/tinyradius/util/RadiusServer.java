@@ -18,8 +18,9 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -287,11 +288,11 @@ public abstract class RadiusServer {
 	}
 
 	/**
-	* Returns a list containing received packets
+	* Returns a map containing received packets
 	*
 	* @return list of received packets
 	*/
-	public List getReceivedPackets() {
+	public Map<String, Long> getReceivedPackets() {
 		return receivedPackets;
 	}
 
@@ -600,36 +601,30 @@ public abstract class RadiusServer {
 
 		byte[] authenticator = packet.getAuthenticator();
 
+		String uniqueKey = address.getAddress().getHostAddress()+ 
+			packet.getPacketIdentifier() + 
+			Arrays.toString(packet.getAuthenticator());
+
 		synchronized (receivedPackets) {
-			for (Iterator i = receivedPackets.iterator(); i.hasNext();) {
-				ReceivedPacket p = (ReceivedPacket) i.next();
-				if (p.receiveTime < intervalStart) {
-					// packet is older than duplicate interval
-					i.remove();
-				}
-				else {
-					if (p.address.equals(address) && p.packetIdentifier == packet.getPacketIdentifier()) {
-						if (authenticator != null && p.authenticator != null) {
-							// packet is duplicate if stored authenticator is equal
-							// to the packet authenticator
-							return Arrays.equals(p.authenticator, authenticator);
-						}
-						// should not happen, packet is duplicate
-						return true;
+			if (lastClean == 0 || lastClean < now - getDuplicateInterval()) {
+				lastClean = now;
+				for (Iterator<Map.Entry<String, Long>> i = receivedPackets.entrySet().iterator(); i.hasNext(); ) {
+					Long receiveTime = i.next().getValue();
+					if (receiveTime < intervalStart) {
+						// packet is older than duplicate interval
+						i.remove();
 					}
 				}
 			}
 
-			// add packet to receive list
-			ReceivedPacket rp = new ReceivedPacket();
-			rp.address = address;
-			rp.packetIdentifier = packet.getPacketIdentifier();
-			rp.receiveTime = now;
-			rp.authenticator = authenticator;
-			receivedPackets.add(rp);
+			Long receiveTime = receivedPackets.get(uniqueKey);
+			if (receiveTime == null) {
+				receivedPackets.put(uniqueKey, System.currentTimeMillis());
+				return false;
+			} else {
+				return !(receiveTime < intervalStart);
+			}
 		}
-
-		return false;
 	}
 
 	private InetAddress listenAddress = null;
@@ -638,37 +633,10 @@ public abstract class RadiusServer {
 	private DatagramSocket authSocket = null;
 	private DatagramSocket acctSocket = null;
 	private int socketTimeout = 3000;
-	private List receivedPackets = new LinkedList();
+	private HashMap<String, Long> receivedPackets = new HashMap<>();
+	private long lastClean;
 	private long duplicateInterval = 30000; // 30 s
 	protected transient boolean closing = false;
 	private static Log logger = LogFactory.getLog(RadiusServer.class);
-
-}
-
-/**
- * This internal class represents a packet that has been received by
- * the server.
- */
-class ReceivedPacket {
-
-	/**
-	 * The identifier of the packet.
-	 */
-	public int packetIdentifier;
-
-	/**
-	 * The time the packet was received.
-	 */
-	public long receiveTime;
-
-	/**
-	 * The address of the host who sent the packet.
-	 */
-	public InetSocketAddress address;
-
-	/**
-	 * Authenticator of the received packet.
-	 */
-	public byte[] authenticator;
 
 }
