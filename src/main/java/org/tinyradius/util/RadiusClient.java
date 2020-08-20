@@ -313,27 +313,31 @@ public class RadiusClient {
 		DatagramPacket packetOut = makeDatagramPacket(request, port);
 
 		DatagramSocket socket = getSocket();
-		for (int i = 1; i <= getRetryCount(); i++) {
-			try {
-				socket.send(packetOut);
-				socket.receive(packetIn);
-				return makeRadiusPacket(packetIn, request);
-			} catch (IOException ioex) {
-				if (i == getRetryCount()) {
-					if (logger.isErrorEnabled()) {
-						if (ioex instanceof SocketTimeoutException)
-							logger.error("communication failure (timeout), no more retries");
-						else
-							logger.error("communication failure, no more retries", ioex);
+		try {
+			for (int i = 1; i <= getRetryCount(); i++) {
+				try {
+					socket.send(packetOut);
+					socket.receive(packetIn);
+					return makeRadiusPacket(packetIn, request);
+				} catch (IOException ioex) {
+					if (i == getRetryCount()) {
+						if (logger.isErrorEnabled()) {
+							if (ioex instanceof SocketTimeoutException)
+								logger.error("communication failure (timeout), no more retries");
+							else
+								logger.error("communication failure, no more retries", ioex);
+						}
+						throw ioex;
 					}
-					throw ioex;
+					if (logger.isInfoEnabled())
+						logger.info("communication failure, retry " + i);
+					// TODO increase Acct-Delay-Time by getSocketTimeout()/1000
+					// this changes the packet authenticator and requires packetOut to be
+					// calculated again (call makeDatagramPacket)
 				}
-				if (logger.isInfoEnabled())
-					logger.info("communication failure, retry " + i);
-				// TODO increase Acct-Delay-Time by getSocketTimeout()/1000
-				// this changes the packet authenticator and requires packetOut to be
-				// calculated again (call makeDatagramPacket)
 			}
+		}finally {
+			socket.close();
 		}
 
 		return null;
