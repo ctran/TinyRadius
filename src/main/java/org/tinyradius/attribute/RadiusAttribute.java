@@ -148,6 +148,35 @@ public class RadiusAttribute {
 	}
 
 	/**
+	 * Sets the tag value of the attribute
+	 *
+	 * @param tag
+	 *            value of tag
+	 */
+	public void setTag(int tag) {
+		hasTag = true;
+		this.tag = tag;
+	}
+
+	/**
+	 * Returns the tag flag.
+	 *
+	 * @return tag flag
+	 */
+	public boolean hasTag() {
+		return hasTag;
+	}
+
+	/**
+	 * Returns the tag value.
+	 *
+	 * @return tag value
+	 */
+	public int getTag() {
+		return tag;
+	}
+
+	/**
 	 * Returns this attribute encoded as a byte array.
 	 * 
 	 * @return attribute
@@ -158,10 +187,20 @@ public class RadiusAttribute {
 		if (attributeData == null)
 			throw new NullPointerException("attribute data not set");
 
-		byte[] attr = new byte[2 + attributeData.length];
-		attr[0] = (byte) getAttributeType();
-		attr[1] = (byte) (2 + attributeData.length);
-		System.arraycopy(attributeData, 0, attr, 2, attributeData.length);
+		byte[] attr = null;
+		if (!hasTag) {
+			attr = new byte[2 + attributeData.length];
+			attr[0] = (byte) getAttributeType();
+			attr[1] = (byte) (2 + attributeData.length);
+			System.arraycopy(attributeData, 0, attr, 2, attributeData.length);
+		} else {
+			attr = new byte[3 + attributeData.length];
+			attr[0] = (byte) getAttributeType();
+			attr[1] = (byte) (3 + attributeData.length);
+			attr[2] = (byte) (tag);
+			System.arraycopy(attributeData, 0, attr, 3, attributeData.length);
+		}
+
 		return attr;
 	}
 
@@ -295,4 +334,9 @@ public class RadiusAttribute {
 	 */
 	private byte[] attributeData = null;
 
+	/**
+	 * tag info
+	 */
+	private int tag = 0;
+	private boolean hasTag = false;
 }
