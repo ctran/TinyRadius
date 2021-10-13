@@ -370,7 +370,7 @@ public class RadiusClient {
 	 * @throws SocketException
 	 */
 	protected DatagramSocket getSocket() throws SocketException {
-		if (serverSocket == null) {
+		if (serverSocket == null || serverSocket.isClosed()) {
 			serverSocket = new DatagramSocket();
 			serverSocket.setSoTimeout(getSocketTimeout());
 		}
