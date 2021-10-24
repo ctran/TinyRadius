@@ -26,17 +26,17 @@ extends MemoryDictionary{
 	public static Dictionary getDefaultDictionary() {
 		return instance;
 	}
-	
+
 	/**
 	 * Make constructor private so that a DefaultDictionary
-	 * cannot be constructed by other classes. 
+	 * cannot be constructed by other classes.
 	 */
 	private DefaultDictionary() {
 	}
-	
+
 	private static final String DICTIONARY_RESOURCE = "org/tinyradius/dictionary/default_dictionary";
 	private static DefaultDictionary instance = null;
-	
+
 	/**
 	 * Creates the singleton instance of this object
 	 * and parses the classpath ressource.
@@ -44,11 +44,15 @@ extends MemoryDictionary{
 	static {
 		try {
 			instance = new DefaultDictionary();
-    		InputStream source = DefaultDictionary.class.getClassLoader().getResourceAsStream(DICTIONARY_RESOURCE);
+			ClassLoader classLoader = DefaultDictionary.class.getClassLoader();
+			InputStream source = classLoader.getResourceAsStream("tinyradius_dictionary");
+			if (source == null) {
+				source = classLoader.getResourceAsStream(DICTIONARY_RESOURCE);
+			}
 			DictionaryParser.parseDictionary(source, instance);
 		} catch (IOException e) {
 			throw new RuntimeException("default dictionary unavailable", e);
 		}
 	}
-	
+
 }

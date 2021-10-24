@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -73,15 +73,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<resources>
-			<resource>
-				<directory>${basedir}/src/main/java</directory>
-				<filtering>false</filtering>
-				<includes>
-					<include>org/tinyradius/dictionary/default_dictionary</include>
-				</includes>
-			</resource>
-		</resources>
 	</build>
 	<distributionManagement>
 		<repository>
