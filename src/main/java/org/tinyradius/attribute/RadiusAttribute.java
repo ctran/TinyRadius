@@ -311,7 +311,7 @@ public class RadiusAttribute {
 			case 4:
 				return new byte[] {(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) value};
 			default:
-				throw new IllegalArgumentException("integer can only be [1,2,3] bytes in size");
+				throw new IllegalArgumentException("integer can only be [1,2,4] bytes in size");
 		}
 	}
 

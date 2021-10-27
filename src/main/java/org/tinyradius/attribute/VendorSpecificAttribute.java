@@ -334,7 +334,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 					((bytes[offset + 2] & 0xFF) << 8 ) |
 					((bytes[offset + 3] & 0xFF) << 0 );
 			default:
-				throw new IllegalArgumentException("integer can only be [1,2,3] bytes in size");
+				throw new IllegalArgumentException("integer can only be [1,2,4] bytes in size");
 		}
 	}
 
