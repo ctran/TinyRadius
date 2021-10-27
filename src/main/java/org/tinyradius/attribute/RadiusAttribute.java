@@ -74,10 +74,10 @@ public class RadiusAttribute {
 	 * Sets the type of this Radius attribute.
 	 * 
 	 * @param attributeType
-	 *            type code, 0-255
+	 *            type code, 0-65535
 	 */
 	public void setAttributeType(int attributeType) {
-		if (attributeType < 0 || attributeType > 255)
+		if (attributeType < 0 || attributeType > 65535)
 			throw new IllegalArgumentException("attribute type invalid: " + attributeType);
 		this.attributeType = attributeType;
 	}
@@ -166,6 +166,24 @@ public class RadiusAttribute {
 	}
 
 	/**
+	 * Returns this attribute encoded as a byte array.
+	 *
+	 * @return attribute
+	 */
+	public byte[] writeAttribute(int attrTypeSize, int attrLenSize) {
+		if (getAttributeType() == -1)
+			throw new IllegalArgumentException("attribute type not set");
+		if (attributeData == null)
+			throw new NullPointerException("attribute data not set");
+
+		byte[] attr = new byte[attrTypeSize + attrLenSize + attributeData.length];
+		System.arraycopy(toByteArray(getAttributeType(), attrTypeSize), 0, attr, 0, attrTypeSize);
+		System.arraycopy(toByteArray(attrTypeSize + attrLenSize + attributeData.length, attrLenSize), 0, attr, attrTypeSize, attrLenSize);
+		System.arraycopy(attributeData, 0, attr, attrTypeSize + attrLenSize, attributeData.length);
+		return attr;
+	}
+
+	/**
 	 * Reads in this attribute from the passed byte array.
 	 * 
 	 * @param data
@@ -177,6 +195,15 @@ public class RadiusAttribute {
 		int attrLen = data[offset + 1] & 0x0ff;
 		byte[] attrData = new byte[attrLen - 2];
 		System.arraycopy(data, offset + 2, attrData, 0, attrLen - 2);
+		setAttributeType(attrType);
+		setAttributeData(attrData);
+	}
+
+	public void readAttribute(byte[] data, int offset, int attrType, int attrLen, int attrTypeSize, int attrLenSize) throws RadiusException {
+		if (attrLen < 2)
+			throw new RadiusException("attribute length too small: " + attrLen);
+		byte[] attrData = new byte[attrLen - attrTypeSize - attrLenSize];
+		System.arraycopy(data, offset + attrTypeSize + attrLenSize, attrData, 0, attrLen - attrTypeSize - attrLenSize);
 		setAttributeType(attrType);
 		setAttributeData(attrData);
 	}
@@ -273,6 +300,19 @@ public class RadiusAttribute {
 	public static RadiusAttribute createRadiusAttribute(int attributeType) {
 		Dictionary dictionary = DefaultDictionary.getDefaultDictionary();
 		return createRadiusAttribute(dictionary, -1, attributeType);
+	}
+
+	private static byte[] toByteArray(int value, int len) {
+		switch (len) {
+			case 1:
+				return new byte[] {(byte) value};
+			case 2:
+				return new byte[] {(byte) (value >> 8), (byte) value};
+			case 4:
+				return new byte[] {(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) value};
+			default:
+				throw new IllegalArgumentException("integer can only be [1,2,3] bytes in size");
+		}
 	}
 
 	/**

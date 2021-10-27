@@ -1,7 +1,7 @@
 /**
  * $Id: VendorSpecificAttribute.java,v 1.7 2005/11/22 10:18:38 wuttke Exp $
  * Created on 10.04.2005
- * 
+ *
  * @author Matthias Wuttke
  * @version $Revision: 1.7 $
  */
@@ -37,7 +37,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Constructs a new Vendor-Specific attribute to be sent.
-	 * 
+	 *
 	 * @param vendorId
 	 *            vendor ID of the sub-attributes
 	 */
@@ -48,7 +48,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Sets the vendor ID of the child attributes.
-	 * 
+	 *
 	 * @param childVendorId
 	 */
 	public void setChildVendorId(int childVendorId) {
@@ -57,7 +57,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Returns the vendor ID of the sub-attributes.
-	 * 
+	 *
 	 * @return vendor ID of sub attributes
 	 */
 	public int getChildVendorId() {
@@ -66,7 +66,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Also copies the new dictionary to sub-attributes.
-	 * 
+	 *
 	 * @param dictionary
 	 *            dictionary to set
 	 * @see org.tinyradius.attribute.RadiusAttribute#setDictionary(org.tinyradius.dictionary.Dictionary)
@@ -81,7 +81,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Adds a sub-attribute to this attribute.
-	 * 
+	 *
 	 * @param attribute
 	 *            sub-attribute to add
 	 */
@@ -94,7 +94,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Adds a sub-attribute with the specified name to this attribute.
-	 * 
+	 *
 	 * @param name
 	 *            name of the sub-attribute
 	 * @param value
@@ -123,7 +123,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Removes the specified sub-attribute from this attribute.
-	 * 
+	 *
 	 * @param attribute
 	 *            RadiusAttribute to remove
 	 */
@@ -134,7 +134,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Returns the list of sub-attributes.
-	 * 
+	 *
 	 * @return List of RadiusAttribute objects
 	 */
 	public List getSubAttributes() {
@@ -143,7 +143,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Returns all sub-attributes of this attribut which have the given type.
-	 * 
+	 *
 	 * @param attributeType
 	 *            type of sub-attributes to get
 	 * @return list of RadiusAttribute objects, does not return null
@@ -164,7 +164,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	/**
 	 * Returns a sub-attribute of the given type which may only occur once in
 	 * this attribute.
-	 * 
+	 *
 	 * @param type
 	 *            sub-attribute type
 	 * @return RadiusAttribute object or null if there is no such sub-attribute
@@ -184,7 +184,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Returns a single sub-attribute of the given type name.
-	 * 
+	 *
 	 * @param type
 	 *            attribute type name
 	 * @return RadiusAttribute object or null if there is no such attribute
@@ -208,7 +208,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	/**
 	 * Returns the value of the Radius attribute of the given type or null if
 	 * there is no such attribute.
-	 * 
+	 *
 	 * @param type
 	 *            attribute type name
 	 * @return value of the attribute as a string or null if there is no such
@@ -228,7 +228,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 	/**
 	 * Renders this attribute as a byte array.
-	 * 
+	 *
 	 * @see org.tinyradius.attribute.RadiusAttribute#writeAttribute()
 	 */
 	public byte[] writeAttribute() {
@@ -243,7 +243,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		try {
 			for (Iterator i = subAttributes.iterator(); i.hasNext();) {
 				RadiusAttribute a = (RadiusAttribute) i.next();
-				bos.write(a.writeAttribute());
+				bos.write(a.writeAttribute(getDictionary().getVendorTypeSize(getChildVendorId()), getDictionary().getVendorLengthSize(getChildVendorId())));
 			}
 		}
 		catch (IOException ioe) {
@@ -268,7 +268,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	/**
 	 * Reads a Vendor-Specific attribute and decodes the internal sub-attribute
 	 * structure.
-	 * 
+	 *
 	 * @see org.tinyradius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
 	 */
 	public void readAttribute(byte[] data, int offset, int length) throws RadiusException {
@@ -283,22 +283,21 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 			throw new RadiusException("not a Vendor-Specific attribute");
 
 		// read vendor ID and vendor data
-		/*
-		 * int vendorId = (data[offset + 2] << 24 | data[offset + 3] << 16 |
-		 * data[offset + 4] << 8 | ((int)data[offset + 5] & 0x000000ff));
-		 */
-		int vendorId = (unsignedByteToInt(data[offset + 2]) << 24 | unsignedByteToInt(data[offset + 3]) << 16
-		        | unsignedByteToInt(data[offset + 4]) << 8 | unsignedByteToInt(data[offset + 5]));
+		int vendorId = unsignedByteToInt(data, offset + 2, 4);
 		setChildVendorId(vendorId);
 
 		// validate sub-attribute structure
 		int pos = 0;
 		int count = 0;
+
+		int vendorTypeSize = getDictionary().getVendorTypeSize(vendorId);
+		int vendorLengthSize = getDictionary().getVendorLengthSize(vendorId);
+
 		while (pos < vsaLen) {
 			if (pos + 1 >= vsaLen)
 				throw new RadiusException("Vendor-Specific attribute malformed");
-			// int vsaSubType = data[(offset + 6) + pos] & 0x0ff;
-			int vsaSubLen = data[(offset + 6) + pos + 1] & 0x0ff;
+			//int vsaSubType = unsignedByteToInt(data, (offset + 6) + pos, vendorTypeSize);
+			int vsaSubLen = unsignedByteToInt(data, (offset + 6) + pos + vendorTypeSize, vendorLengthSize);
 			pos += vsaSubLen;
 			count++;
 		}
@@ -308,12 +307,13 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		subAttributes = new ArrayList(count);
 		pos = 0;
 		while (pos < vsaLen) {
-			int subtype = data[(offset + 6) + pos] & 0x0ff;
-			int sublength = data[(offset + 6) + pos + 1] & 0x0ff;
-			RadiusAttribute a = createRadiusAttribute(getDictionary(), vendorId, subtype);
-			a.readAttribute(data, (offset + 6) + pos, sublength);
+			int subType = unsignedByteToInt(data, (offset + 6) + pos, vendorTypeSize);
+			int subLength = unsignedByteToInt(data, (offset + 6) + pos + vendorTypeSize, vendorLengthSize);
+
+			RadiusAttribute a = createRadiusAttribute(getDictionary(), vendorId, subType);
+			a.readAttribute(data, (offset + 6) + pos, subType, subLength, vendorTypeSize, vendorLengthSize);
 			subAttributes.add(a);
-			pos += sublength;
+			pos += subLength;
 		}
 	}
 
@@ -321,9 +321,26 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		return b & 0xFF;
 	}
 
+	private static int unsignedByteToInt(byte[] bytes, int offset, int len) {
+		switch (len) {
+			case 1:
+				return bytes[offset] & 0xFF;
+			case 2:
+				return ((bytes[offset] & 0xFF) << 8 ) |
+						((bytes[offset + 1] & 0xFF) << 0 );
+			case 4:
+				return ((bytes[offset] & 0xFF) << 24) |
+					((bytes[offset + 1] & 0xFF) << 16) |
+					((bytes[offset + 2] & 0xFF) << 8 ) |
+					((bytes[offset + 3] & 0xFF) << 0 );
+			default:
+				throw new IllegalArgumentException("integer can only be [1,2,3] bytes in size");
+		}
+	}
+
 	/**
 	 * Returns a string representation for debugging.
-	 * 
+	 *
 	 * @see org.tinyradius.attribute.RadiusAttribute#toString()
 	 */
 	public String toString() {

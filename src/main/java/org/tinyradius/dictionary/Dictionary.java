@@ -53,5 +53,21 @@ public interface Dictionary {
 	 * @return vendor ID or -1
 	 */
 	public int getVendorId(String vendorName);
+
+	/**
+	 * Retrieves vendor type size in bytes
+	 * vendor code.
+	 * @param vendorId vendor number
+	 * @return vendor name or null
+	 */
+	public int getVendorTypeSize(int vendorId);
+
+	/**
+	 * Retrieves vendor length size in bytes
+	 * vendor code.
+	 * @param vendorId vendor number
+	 * @return vendor name or null
+	 */
+	public int getVendorLengthSize(int vendorId);
 	
 }

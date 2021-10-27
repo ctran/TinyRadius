@@ -65,10 +65,10 @@ public class AttributeType {
 	 * Sets the Radius type code for this attribute type.
 	 * 
 	 * @param code
-	 *            type code, 1-255
+	 *            type code, 1-65535
 	 */
 	public void setTypeCode(int code) {
-		if (code < 1 || code > 255)
+		if (code < 1 || code > 65535)
 			throw new IllegalArgumentException("code out of bounds");
 		this.typeCode = code;
 	}
