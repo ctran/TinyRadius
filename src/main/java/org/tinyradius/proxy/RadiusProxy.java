@@ -17,8 +17,9 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.packet.RadiusPacket;
 import org.tinyradius.util.RadiusEndpoint;
@@ -43,7 +44,7 @@ public abstract class RadiusProxy extends RadiusServer {
 				public void run() {
 					setName("Radius Proxy Listener");
 					try {
-						logger.info("starting RadiusProxyListener on port " + getProxyPort());
+						logger.info("starting RadiusProxyListener on port {}", getProxyPort());
 						listen(getProxySocket());
 					}
 					catch (Exception e) {
@@ -149,7 +150,7 @@ public abstract class RadiusProxy extends RadiusServer {
 		if (radiusServer != null) {
 			// proxy incoming packet to other radius server
 			RadiusProxyConnection proxyConnection = new RadiusProxyConnection(radiusServer, radiusClient, request, localAddress.getPort());
-			logger.info("proxy packet to " + proxyConnection);
+			logger.info("proxy packet to {}", proxyConnection);
 			proxyPacket(request, proxyConnection);
 			return null;
 		}
@@ -186,8 +187,8 @@ public abstract class RadiusProxy extends RadiusServer {
 		// retrieve client
 		RadiusEndpoint client = proxyConnection.getRadiusClient();
 		if (logger.isInfoEnabled()) {
-			logger.info("received proxy packet: " + packet);
-			logger.info("forward packet to " + client.getEndpointAddress().toString() + " with secret " + client.getSharedSecret());
+			logger.info("received proxy packet: {}", packet);
+			logger.info("forward packet to {} with secret {}", client.getEndpointAddress().toString(), client.getSharedSecret());
 		}
 
 		// remove only own Proxy-State (last attribute)
@@ -265,6 +266,6 @@ public abstract class RadiusProxy extends RadiusServer {
 
 	private int proxyPort = 1814;
 	private DatagramSocket proxySocket = null;
-	private static Log logger = LogFactory.getLog(RadiusProxy.class);
+	private static Logger logger = LoggerFactory.getLogger(RadiusProxy.class);
 
 }

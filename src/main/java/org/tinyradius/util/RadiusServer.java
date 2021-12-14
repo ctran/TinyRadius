@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.packet.AccessRequest;
 import org.tinyradius.packet.AccountingRequest;
@@ -138,13 +138,13 @@ public abstract class RadiusServer {
 				public void run() {
 					setName("Radius Auth Listener");
 					try {
-						logger.info("starting RadiusAuthListener on port " + getAuthPort());
+						logger.info("starting RadiusAuthListener on port {}", getAuthPort());
 						listenAuth();
 						logger.info("RadiusAuthListener is being terminated");
 					}
 					catch (Exception e) {
 						e.printStackTrace();
-						logger.fatal("auth thread stopped by exception", e);
+						logger.error("FATAL: auth thread stopped by exception", e);
 					}
 					finally {
 						authSocket.close();
@@ -159,13 +159,13 @@ public abstract class RadiusServer {
 				public void run() {
 					setName("Radius Acct Listener");
 					try {
-						logger.info("starting RadiusAcctListener on port " + getAcctPort());
+						logger.info("starting RadiusAcctListener on port {}", getAcctPort());
 						listenAcct();
 						logger.info("RadiusAcctListener is being terminated");
 					}
 					catch (Exception e) {
 						e.printStackTrace();
-						logger.fatal("acct thread stopped by exception", e);
+						logger.error("FATAL: acct thread stopped by exception", e);
 					}
 					finally {
 						acctSocket.close();
@@ -374,7 +374,7 @@ public abstract class RadiusServer {
 					logger.trace("about to call socket.receive()");
 					s.receive(packetIn);
 					if (logger.isDebugEnabled())
-						logger.debug("receive buffer size = " + s.getReceiveBufferSize());
+						logger.debug("receive buffer size = {}", s.getReceiveBufferSize());
 				}
 				catch (SocketException se) {
 					if (closing) {
@@ -429,14 +429,14 @@ public abstract class RadiusServer {
 			final String secret = getSharedSecret(remoteAddress, makeRadiusPacket(packetIn, "1234567890", RadiusPacket.RESERVED));
 			if (secret == null) {
 				if (logger.isInfoEnabled())
-					logger.info("ignoring packet from unknown client " + remoteAddress + " received on local address " + localAddress);
+					logger.info("ignoring packet from unknown client {} received on local address {}", remoteAddress,  localAddress);
 				return;
 			}
 
 			// parse packet
 			final RadiusPacket request = makeRadiusPacket(packetIn, secret, RadiusPacket.UNDEFINED);
 			if (logger.isInfoEnabled())
-				logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
+				logger.info("received packet from {} on local address {}", remoteAddress, localAddress + ": " + request);
 
 			// handle packet
 			logger.trace("about to call RadiusServer.handlePacket()");
@@ -445,7 +445,7 @@ public abstract class RadiusServer {
 			// send response
 			if (response != null) {
 				if (logger.isInfoEnabled())
-					logger.info("send response: " + response);
+					logger.info("send response: {}", response);
 				final DatagramPacket packetOut = makeDatagramPacket(response, secret, remoteAddress.getAddress(), packetIn.getPort(), request);
 				s.send(packetOut);
 			}
@@ -487,14 +487,14 @@ public abstract class RadiusServer {
 				if (request instanceof AccessRequest)
 					response = accessRequestReceived((AccessRequest) request, remoteAddress);
 				else
-					logger.error("unknown Radius packet type: " + request.getPacketType());
+					logger.error("unknown Radius packet type: {}", request.getPacketType());
 			}
 			else if (localAddress.getPort() == getAcctPort()) {
 				// handle packets on acct port
 				if (request instanceof AccountingRequest)
 					response = accountingRequestReceived((AccountingRequest) request, remoteAddress);
 				else
-					logger.error("unknown Radius packet type: " + request.getPacketType());
+					logger.error("unknown Radius packet type: {}", request.getPacketType());
 			}
 			else {
 				// ignore packet on unknown port
@@ -637,6 +637,6 @@ public abstract class RadiusServer {
 	private long lastClean;
 	private long duplicateInterval = 30000; // 30 s
 	protected transient boolean closing = false;
-	private static Log logger = LogFactory.getLog(RadiusServer.class);
+	private static Logger logger = LoggerFactory.getLogger(RadiusServer.class);
 
 }

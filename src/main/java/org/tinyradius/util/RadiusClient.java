@@ -15,8 +15,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tinyradius.packet.AccessRequest;
 import org.tinyradius.packet.AccountingRequest;
 import org.tinyradius.packet.RadiusPacket;
@@ -111,11 +111,11 @@ public class RadiusClient {
 	 */
 	public synchronized RadiusPacket authenticate(AccessRequest request) throws IOException, RadiusException {
 		if (logger.isInfoEnabled())
-			logger.info("send Access-Request packet: " + request);
+			logger.info("send Access-Request packet: {}", request);
 
 		RadiusPacket response = communicate(request, getAuthPort());
 		if (logger.isInfoEnabled())
-			logger.info("received packet: " + response);
+			logger.info("received packet: {}", response);
 
 		return response;
 	}
@@ -135,11 +135,11 @@ public class RadiusClient {
 	 */
 	public synchronized RadiusPacket account(AccountingRequest request) throws IOException, RadiusException {
 		if (logger.isInfoEnabled())
-			logger.info("send Accounting-Request packet: " + request);
+			logger.info("send Accounting-Request packet: {}", request);
 
 		RadiusPacket response = communicate(request, getAcctPort());
 		if (logger.isInfoEnabled())
-			logger.info("received packet: " + response);
+			logger.info("received packet: {}", response);
 
 		return response;
 	}
@@ -330,7 +330,7 @@ public class RadiusClient {
 						throw ioex;
 					}
 					if (logger.isInfoEnabled())
-						logger.info("communication failure, retry " + i);
+						logger.info("communication failure, retry {}", i);
 					// TODO increase Acct-Delay-Time by getSocketTimeout()/1000
 					// this changes the packet authenticator and requires packetOut to be
 					// calculated again (call makeDatagramPacket)
@@ -419,6 +419,6 @@ public class RadiusClient {
 	private int retryCount = 3;
 	private int socketTimeout = 3000;
 	private String authProtocol = AccessRequest.AUTH_PAP;
-	private static Log logger = LogFactory.getLog(RadiusClient.class);
+	private static Logger logger = LoggerFactory.getLogger(RadiusClient.class);
 
 }

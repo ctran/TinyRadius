@@ -14,8 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.attribute.StringAttribute;
 import org.tinyradius.util.RadiusException;
@@ -318,8 +318,8 @@ public class AccessRequest extends RadiusPacket {
 	private String decodePapPassword(byte[] encryptedPass, byte[] sharedSecret) throws RadiusException {
 		if (encryptedPass == null || encryptedPass.length < 16) {
 			// PAP passwords require at least 16 bytes
-			logger.warn("invalid Radius packet: User-Password attribute with malformed PAP password, length = "
-			        + (encryptedPass == null ? 0 : encryptedPass.length) + ", but length must be greater than 15");
+			logger.warn("invalid Radius packet: User-Password attribute with malformed PAP password, length = {}"
+					+ ", but length must be greater than 15", (encryptedPass == null ? 0 : encryptedPass.length));
 			throw new RadiusException("malformed User-Password attribute");
 		}
 
@@ -478,6 +478,6 @@ public class AccessRequest extends RadiusPacket {
 	/**
 	 * Logger for logging information about malformed packets
 	 */
-	private static Log logger = LogFactory.getLog(AccessRequest.class);
+	private static Logger logger = LoggerFactory.getLogger(AccessRequest.class);
 
 }
