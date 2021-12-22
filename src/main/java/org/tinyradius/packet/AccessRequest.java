@@ -297,7 +297,7 @@ public class AccessRequest extends RadiusPacket {
 				md5.update(encryptedPass, i - 16, 16);
 			}
 
-			byte bn[] = md5.digest();
+			byte[] bn = md5.digest();
 
 			// perform the XOR as specified by RFC 2865.
 			for (int j = 0; j < 16; j++)
@@ -330,7 +330,7 @@ public class AccessRequest extends RadiusPacket {
 			md5.reset();
 			md5.update(sharedSecret);
 			md5.update(i == 0 ? getAuthenticator() : lastBlock);
-			byte bn[] = md5.digest();
+			byte[] bn = md5.digest();
 
 			System.arraycopy(encryptedPass, i, lastBlock, 0, 16);
 
