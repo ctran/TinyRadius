@@ -107,6 +107,7 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * @param socketTimeout
 	 *            socket timeout, >0 ms
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	public void setSocketTimeout(int socketTimeout) throws SocketException {
 		super.setSocketTimeout(socketTimeout);
@@ -119,6 +120,7 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * 
 	 * @return socket
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	protected DatagramSocket getProxySocket() throws SocketException {
 		if (proxySocket == null) {
@@ -167,17 +169,18 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * @param remote
 	 *            the server the packet arrived from
 	 * @throws IOException
+	 *            IO Exception
 	 */
 	protected void proxyPacketReceived(RadiusPacket packet, InetSocketAddress remote) throws IOException, RadiusException {
 		// retrieve my Proxy-State attribute (the last)
-		List proxyStates = packet.getAttributes(33);
+		List<RadiusAttribute> proxyStates = packet.getAttributes(33);
 		if (proxyStates == null || proxyStates.size() == 0)
 			throw new RadiusException("proxy packet without Proxy-State attribute");
-		RadiusAttribute proxyState = (RadiusAttribute) proxyStates.get(proxyStates.size() - 1);
+		RadiusAttribute proxyState = proxyStates.get(proxyStates.size() - 1);
 
 		// retrieve proxy connection from cache
 		String state = new String(proxyState.getAttributeData());
-		RadiusProxyConnection proxyConnection = (RadiusProxyConnection) proxyConnections.remove(state);
+		RadiusProxyConnection proxyConnection = proxyConnections.remove(state);
 		if (proxyConnection == null) {
 			logger.warn("received packet on proxy port without saved proxy connection - duplicate?");
 			return;
@@ -214,9 +217,10 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * 
 	 * @param packet
 	 *            the packet to proxy
-	 * @param proxyCon
+	 * @param proxyConnection
 	 *            the RadiusProxyConnection for this packet
 	 * @throws IOException
+	 *            IO Exception
 	 */
 	protected void proxyPacket(RadiusPacket packet, RadiusProxyConnection proxyConnection) throws IOException {
 		synchronized (RadiusProxy.class) {
@@ -261,10 +265,10 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * without a received response.
 	 * Key: Proxy Index (String), Value: RadiusProxyConnection
 	 */
-	private Map proxyConnections = new HashMap();
+	private Map<String,RadiusProxyConnection> proxyConnections = new HashMap<>();
 
 	private int proxyPort = 1814;
 	private DatagramSocket proxySocket = null;
-	private static Log logger = LogFactory.getLog(RadiusProxy.class);
+	private static final Log logger = LogFactory.getLog(RadiusProxy.class);
 
 }

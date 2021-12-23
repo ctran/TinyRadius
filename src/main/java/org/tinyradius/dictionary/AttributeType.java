@@ -7,7 +7,6 @@
 package org.tinyradius.dictionary;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.tinyradius.attribute.RadiusAttribute;
 
@@ -145,7 +144,7 @@ public class AttributeType {
 	 */
 	public String getEnumeration(int value) {
 		if (enumeration != null) {
-			return (String) enumeration.get(new Integer(value));
+			return enumeration.get(value);
 		}
 		return null;
 	}
@@ -163,10 +162,9 @@ public class AttributeType {
 			throw new IllegalArgumentException("value is empty");
 		if (enumeration == null)
 			return null;
-		for (Iterator i = enumeration.entrySet().iterator(); i.hasNext();) {
-			Map.Entry e = (Map.Entry) i.next();
+		for (Map.Entry<Integer, String> e : enumeration.entrySet()) {
 			if (e.getValue().equals(value))
-				return (Integer) e.getKey();
+				return e.getKey();
 		}
 		return null;
 	}
@@ -183,8 +181,8 @@ public class AttributeType {
 		if (name == null || name.length() == 0)
 			throw new IllegalArgumentException("name is empty");
 		if (enumeration == null)
-			enumeration = new HashMap();
-		enumeration.put(new Integer(num), name);
+			enumeration = new HashMap<>();
+		enumeration.put(num, name);
 	}
 
 	/**
@@ -205,6 +203,6 @@ public class AttributeType {
 	private int typeCode;
 	private String name;
 	private Class attributeClass;
-	private Map enumeration = null;
+	private Map<Integer,String> enumeration = null;
 
 }
