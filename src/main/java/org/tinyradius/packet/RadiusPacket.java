@@ -549,6 +549,7 @@ public class RadiusPacket {
 	 * @deprecated use getVendorAttributes(int)
 	 * @see #getVendorAttributes(int)
 	 */
+	@Deprecated
 	public VendorSpecificAttribute getVendorAttribute(int vendorId) {
 		for (RadiusAttribute radiusAttribute : getAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC)) {
 			VendorSpecificAttribute vsa = (VendorSpecificAttribute) radiusAttribute;
