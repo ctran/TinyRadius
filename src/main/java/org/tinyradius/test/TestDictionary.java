@@ -6,15 +6,11 @@
  */
 package org.tinyradius.test;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-
 import org.tinyradius.attribute.IpAttribute;
 import org.tinyradius.attribute.Ipv6Attribute;
 import org.tinyradius.attribute.Ipv6PrefixAttribute;
 import org.tinyradius.dictionary.Dictionary;
 import org.tinyradius.dictionary.DefaultDictionary;
-import org.tinyradius.dictionary.DictionaryParser;
 import org.tinyradius.packet.AccessRequest;
 
 /**

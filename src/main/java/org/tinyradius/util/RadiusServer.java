@@ -57,13 +57,13 @@ public abstract class RadiusServer {
 	 * passed IP address and the received packet data or null if the client 
 	 * is not allowed at this server.
 	 *
-	 * for compatiblity this standard implementation just call the getSharedSecret(InetSocketAddress) method
-	 * and should be overrived when necessary
+	 * for compatibility this standard implementation just call the getSharedSecret(InetSocketAddress) method
+	 * and should be overridden when necessary
 	 * 
 	 * @param client
 	 *            IP address and port number of client
 	 * @param packet
-	 *            packet received from client, the packettype comes as RESERVED, 
+	 *            packet received from client, the packet type comes as RESERVED,
 	 *	      because for some packets the secret is necessary for decoding
 	 * @return shared secret or null
 	 */
@@ -73,17 +73,17 @@ public abstract class RadiusServer {
 
 	/**
 	 * Returns the password of the passed user. Either this
-	 * method or accessRequestReceived() should be overriden.
+	 * method or accessRequestReceived() should be overridden.
 	 * 
 	 * @param userName
-	 *            user name
+	 *            username
 	 * @return plain-text password or null if user unknown
 	 */
 	public abstract String getUserPassword(String userName);
 
 	/**
 	 * Constructs an answer for an Access-Request packet. Either this
-	 * method or isUserAuthenticated should be overriden.
+	 * method or isUserAuthenticated should be overridden.
 	 * 
 	 * @param accessRequest
 	 *            Radius request packet
@@ -107,7 +107,7 @@ public abstract class RadiusServer {
 
 	/**
 	 * Constructs an answer for an Accounting-Request packet. This method
-	 * should be overriden if accounting is supported.
+	 * should be overridden if accounting is supported.
 	 * 
 	 * @param accountingRequest
 	 *            Radius request packet
@@ -227,10 +227,11 @@ public abstract class RadiusServer {
 	 * @param socketTimeout
 	 *            socket timeout, >0 ms
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	public void setSocketTimeout(int socketTimeout) throws SocketException {
 		if (socketTimeout < 1)
-			throw new IllegalArgumentException("socket tiemout must be positive");
+			throw new IllegalArgumentException("socket timeout must be positive");
 		this.socketTimeout = socketTimeout;
 		if (authSocket != null)
 			authSocket.setSoTimeout(socketTimeout);
@@ -329,9 +330,8 @@ public abstract class RadiusServer {
 	 *            response packet
 	 */
 	protected void copyProxyState(RadiusPacket request, RadiusPacket answer) {
-		List proxyStateAttrs = request.getAttributes(33);
-		for (Iterator i = proxyStateAttrs.iterator(); i.hasNext();) {
-			RadiusAttribute proxyStateAttr = (RadiusAttribute) i.next();
+		List<RadiusAttribute> proxyStateAttrs = request.getAttributes(33);
+		for (RadiusAttribute proxyStateAttr : proxyStateAttrs) {
 			answer.addAttribute(proxyStateAttr);
 		}
 	}
@@ -341,8 +341,8 @@ public abstract class RadiusServer {
 	 * Returns when stop() is called.
 	 * 
 	 * @throws SocketException
-	 * @throws InterruptedException
-	 * 
+	 *            Socket Exception
+	 *
 	 */
 	protected void listenAuth() throws SocketException {
 		listen(getAuthSocket());
@@ -353,7 +353,7 @@ public abstract class RadiusServer {
 	 * Returns when stop() is called.
 	 * 
 	 * @throws SocketException
-	 * @throws InterruptedException
+	 *            Socket Exception
 	 */
 	protected void listenAcct() throws SocketException {
 		listen(getAcctSocket());
@@ -392,12 +392,12 @@ public abstract class RadiusServer {
 				}
 				else {
 					executor.submit(new Runnable() {
-						
+
 						@Override
 						public void run() {
 							processRequest(s, packetIn);
 						}
-						
+
 					});
 				}
 			}
@@ -472,9 +472,12 @@ public abstract class RadiusServer {
 	 * @param request
 	 *            the packet
 	 * @param sharedSecret
+	 *            shared secret
 	 * @return response packet or null for no response
 	 * @throws RadiusException
+	 *            Radius Exception
 	 * @throws IOException
+	 *            IO Exception
 	 */
 	protected RadiusPacket handlePacket(InetSocketAddress localAddress, InetSocketAddress remoteAddress, RadiusPacket request, String sharedSecret)
 	        throws RadiusException, IOException {
@@ -496,9 +499,8 @@ public abstract class RadiusServer {
 				else
 					logger.error("unknown Radius packet type: " + request.getPacketType());
 			}
-			else {
-				// ignore packet on unknown port
-			}
+			// ignore packet on unknown port
+
 		}
 		else
 			logger.info("ignore duplicate packet");
@@ -511,6 +513,7 @@ public abstract class RadiusServer {
 	 * 
 	 * @return socket
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	protected DatagramSocket getAuthSocket() throws SocketException {
 		if (authSocket == null) {
@@ -528,6 +531,7 @@ public abstract class RadiusServer {
 	 * 
 	 * @return socket
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	protected DatagramSocket getAcctSocket() throws SocketException {
 		if (acctSocket == null) {
@@ -541,7 +545,7 @@ public abstract class RadiusServer {
 	}
 
 	/**
-	 * Creates a Radius response datagram packet from a RadiusPacket to be send.
+	 * Creates a Radius response datagram packet from a RadiusPacket to be sent.
 	 * 
 	 * @param packet
 	 *            RadiusPacket
@@ -555,6 +559,7 @@ public abstract class RadiusServer {
 	 *            request packet
 	 * @return new datagram packet
 	 * @throws IOException
+	 *            IO Exception
 	 */
 	protected DatagramPacket makeDatagramPacket(RadiusPacket packet, String secret, InetAddress address, int port, RadiusPacket request)
 	        throws IOException {
@@ -562,8 +567,7 @@ public abstract class RadiusServer {
 		packet.encodeResponsePacket(bos, secret, request);
 		byte[] data = bos.toByteArray();
 
-		DatagramPacket datagram = new DatagramPacket(data, data.length, address, port);
-		return datagram;
+		return new DatagramPacket(data, data.length, address, port);
 	}
 
 	/**
@@ -637,6 +641,6 @@ public abstract class RadiusServer {
 	private long lastClean;
 	private long duplicateInterval = 30000; // 30 s
 	protected transient boolean closing = false;
-	private static Log logger = LogFactory.getLog(RadiusServer.class);
+	private static final Log logger = LogFactory.getLog(RadiusServer.class);
 
 }

@@ -59,7 +59,7 @@ public class RadiusClient {
 	 * Authenticates a user via PAP.
 	 * 
 	 * @param userName
-	 *            user name
+	 *            username
 	 * @param password
 	 *            password
 	 * @return true if authentication is successful, false otherwise
@@ -77,7 +77,7 @@ public class RadiusClient {
 	 * Authenticates a user.
 	 * 
 	 * @param userName
-	 *            user name
+	 *            username
 	 * @param password
 	 *            password
 	 * @param protocol
@@ -251,10 +251,11 @@ public class RadiusClient {
 	 * @param socketTimeout
 	 *            timeout, ms, >0
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	public void setSocketTimeout(int socketTimeout) throws SocketException {
 		if (socketTimeout < 1)
-			throw new IllegalArgumentException("socket tiemout must be positive");
+			throw new IllegalArgumentException("socket timeout must be positive");
 		this.socketTimeout = socketTimeout;
 		if (serverSocket != null)
 			serverSocket.setSoTimeout(socketTimeout);
@@ -368,6 +369,7 @@ public class RadiusClient {
 	 * 
 	 * @return local socket
 	 * @throws SocketException
+	 *            Socket Exception
 	 */
 	protected DatagramSocket getSocket() throws SocketException {
 		if (serverSocket == null || serverSocket.isClosed()) {
@@ -378,7 +380,7 @@ public class RadiusClient {
 	}
 
 	/**
-	 * Creates a datagram packet from a RadiusPacket to be send.
+	 * Creates a datagram packet from a RadiusPacket to be sent.
 	 * 
 	 * @param packet
 	 *            RadiusPacket
@@ -386,6 +388,7 @@ public class RadiusClient {
 	 *            destination port number
 	 * @return new datagram packet
 	 * @throws IOException
+	 *            IO Exception
 	 */
 	protected DatagramPacket makeDatagramPacket(RadiusPacket packet, int port) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -393,8 +396,7 @@ public class RadiusClient {
 		byte[] data = bos.toByteArray();
 
 		InetAddress address = InetAddress.getByName(getHostName());
-		DatagramPacket datagram = new DatagramPacket(data, data.length, address, port);
-		return datagram;
+		return new DatagramPacket(data, data.length, address, port);
 	}
 
 	/**
@@ -419,6 +421,6 @@ public class RadiusClient {
 	private int retryCount = 3;
 	private int socketTimeout = 3000;
 	private String authProtocol = AccessRequest.AUTH_PAP;
-	private static Log logger = LogFactory.getLog(RadiusClient.class);
+	private static final Log logger = LogFactory.getLog(RadiusClient.class);
 
 }

@@ -4,7 +4,6 @@
  */
 package org.tinyradius.attribute;
 
-import java.util.StringTokenizer;
 import java.net.Inet6Address;
 import java.net.UnknownHostException;
 

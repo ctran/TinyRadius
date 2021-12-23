@@ -50,7 +50,7 @@ public class AccountingRequest extends RadiusPacket {
 	 * Constructs an Accounting-Request packet to be sent to a Radius server.
 	 * 
 	 * @param userName
-	 *            user name
+	 *            username
 	 * @param acctStatusType
 	 *            ACCT_STATUS_TYPE_*
 	 */
@@ -69,10 +69,10 @@ public class AccountingRequest extends RadiusPacket {
 	}
 
 	/**
-	 * Sets the User-Name attribute of this Accountnig-Request.
+	 * Sets the User-Name attribute of this Accounting-Request.
 	 * 
 	 * @param userName
-	 *            user name to set
+	 *            username to set
 	 */
 	public void setUserName(String userName) {
 		if (userName == null)
@@ -85,22 +85,23 @@ public class AccountingRequest extends RadiusPacket {
 	}
 
 	/**
-	 * Retrieves the user name from the User-Name attribute.
+	 * Retrieves the username from the User-Name attribute.
 	 * 
-	 * @return user name
+	 * @return username
 	 * @throws RadiusException
+	 *            Radius Exception
 	 */
 	public String getUserName() throws RadiusException {
-		List attrs = getAttributes(USER_NAME);
-		if (attrs.size() < 1 || attrs.size() > 1)
+		List<RadiusAttribute> attrs = getAttributes(USER_NAME);
+		if (attrs.size() != 1)
 			throw new RuntimeException("exactly one User-Name attribute required");
 
-		RadiusAttribute ra = (RadiusAttribute) attrs.get(0);
-		return ((StringAttribute) ra).getAttributeValue();
+		RadiusAttribute ra = attrs.get(0);
+		return ra.getAttributeValue();
 	}
 
 	/**
-	 * Sets the Acct-Status-Type attribute of this Accountnig-Request.
+	 * Sets the Acct-Status-Type attribute of this Accounting-Request.
 	 * 
 	 * @param acctStatusType
 	 *            ACCT_STATUS_TYPE_* to set
@@ -113,10 +114,11 @@ public class AccountingRequest extends RadiusPacket {
 	}
 
 	/**
-	 * Retrieves the user name from the User-Name attribute.
+	 * Retrieves the username from the User-Name attribute.
 	 * 
-	 * @return user name
+	 * @return username
 	 * @throws RadiusException
+	 *           Radius Exception
 	 */
 	public int getAcctStatusType() throws RadiusException {
 		RadiusAttribute ra = getAttribute(ACCT_STATUS_TYPE);
