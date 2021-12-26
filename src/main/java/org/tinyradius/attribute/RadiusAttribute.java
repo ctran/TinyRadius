@@ -234,7 +234,7 @@ public class RadiusAttribute {
 		AttributeType at = dictionary.getAttributeTypeByCode(vendorId, attributeType);
 		if (at != null && at.getAttributeClass() != null) {
 			try {
-				attribute = (RadiusAttribute) at.getAttributeClass().newInstance();
+				attribute = at.getAttributeClass().newInstance();
 			}
 			catch (Exception e) {
 				// error instantiating class - should not occur

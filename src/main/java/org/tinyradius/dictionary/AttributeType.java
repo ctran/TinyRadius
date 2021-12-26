@@ -26,7 +26,7 @@ public class AttributeType {
 	 *            RadiusAttribute descendant who handles
 	 *            attributes of this type
 	 */
-	public AttributeType(int code, String name, Class type) {
+	public AttributeType(int code, String name, Class<? extends RadiusAttribute> type) {
 		setTypeCode(code);
 		setName(name);
 		setAttributeClass(type);
@@ -44,7 +44,7 @@ public class AttributeType {
 	 * @param type
 	 *            sub-attribute class
 	 */
-	public AttributeType(int vendor, int code, String name, Class type) {
+	public AttributeType(int vendor, int code, String name, Class<? extends RadiusAttribute> type) {
 		setTypeCode(code);
 		setName(name);
 		setAttributeClass(type);
@@ -99,7 +99,7 @@ public class AttributeType {
 	 * 
 	 * @return class
 	 */
-	public Class getAttributeClass() {
+	public Class<? extends RadiusAttribute> getAttributeClass() {
 		return attributeClass;
 	}
 
@@ -107,7 +107,7 @@ public class AttributeType {
 	 * Sets the RadiusAttribute descendant class which represents
 	 * attributes of this type.
 	 */
-	public void setAttributeClass(Class type) {
+	public void setAttributeClass(Class<? extends RadiusAttribute> type) {
 		if (type == null)
 			throw new NullPointerException("type is null");
 		if (!RadiusAttribute.class.isAssignableFrom(type))
@@ -202,7 +202,7 @@ public class AttributeType {
 	private int vendorId = -1;
 	private int typeCode;
 	private String name;
-	private Class attributeClass;
+	private Class<? extends RadiusAttribute> attributeClass;
 	private Map<Integer,String> enumeration = null;
 
 }
