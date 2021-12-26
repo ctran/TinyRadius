@@ -313,8 +313,7 @@ public class RadiusClient {
 		DatagramPacket packetIn = new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
 		DatagramPacket packetOut = makeDatagramPacket(request, port);
 
-		DatagramSocket socket = getSocket();
-		try {
+		try (DatagramSocket socket = getSocket()) {
 			for (int i = 1; i <= getRetryCount(); i++) {
 				try {
 					socket.send(packetOut);
@@ -337,8 +336,6 @@ public class RadiusClient {
 					// calculated again (call makeDatagramPacket)
 				}
 			}
-		}finally {
-			socket.close();
 		}
 
 		return null;
