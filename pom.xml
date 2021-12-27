@@ -84,7 +84,7 @@
 				<configuration>
 					<showDeprecation>true</showDeprecation>
 					<compilerArgs>-Xlint:unchecked</compilerArgs>
-					<!-- Requires mvn 3.6 or later -->
+					<!-- Release directive requires mvn 3.6 and Java 9 or later -->
 					<release>8</release>
 				</configuration>
 			</plugin>
