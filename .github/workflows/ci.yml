@@ -15,7 +15,15 @@ jobs:
       with:
         java-version: 8
         distribution: adopt
+        settings-path: ${{ github.workspace }}
     - name: Build with Maven
-      run: mvn -V -B package --file pom.xml
+      run: mvn -V -B -ntp package --file pom.xml
+
     - name: Calculate dependency tree
       run: mvn -V -B -ntp dependency:tree --file pom.xml
+
+    - name: Publish to https://maven.pkg.github.com/ctran/TinyRadius
+      run: mvn -V -B -ntp -s $GITHUB_WORKSPACE/settings.xml deploy
+      if: ${{ github.event_name == 'push' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
