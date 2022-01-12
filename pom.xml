@@ -11,6 +11,7 @@
 		TinyRadius is a simple, small and fast Java Radius library capable of sending and receiving Radius packets of all types. It is released under the terms of the LGPL.
 	</description>
 	<url>https://github.com/ctran/TinyRadius</url>
+
 	<developers>
 		<developer>
 			<id>wuttke</id>
@@ -23,6 +24,7 @@
 			<email>cuong.tran@gmail.com</email>
 		</developer>
 	</developers>
+	
 	<licenses>
 		<license>
 			<name>Lesser General Public License (LGPL)</name>
@@ -30,6 +32,13 @@
 			<distribution>local</distribution>
 		</license>
 	</licenses>
+	
+	<scm>
+		<connection>scm:svn:http://github.com/ctran/TinyRadius.git</connection>
+		<developerConnection>scm:svn:http://github.com/ctran/TinyRadius.git</developerConnection>
+		<url>http://github.com/ctran/TinyRadius/</url>
+	</scm>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>8</maven.compiler.source>
