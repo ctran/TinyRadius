@@ -17,3 +17,5 @@ jobs:
         distribution: temurin
     - name: Build with Maven
       run: mvn -V -B package --file pom.xml
+    - name: Calculate dependency tree
+      run: mvn -V -B -ntp dependency:tree --file pom.xml
