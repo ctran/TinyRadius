@@ -147,7 +147,7 @@ public class RadiusClient {
 	/**
 	 * Closes the socket of this client.
 	 */
-	public void close() {
+	public synchronized void close() {
 		if (serverSocket != null)
 			serverSocket.close();
 	}
@@ -257,8 +257,10 @@ public class RadiusClient {
 		if (socketTimeout < 1)
 			throw new IllegalArgumentException("socket timeout must be positive");
 		this.socketTimeout = socketTimeout;
-		if (serverSocket != null)
-			serverSocket.setSoTimeout(socketTimeout);
+		synchronized (this) {
+			if (serverSocket != null)
+				serverSocket.setSoTimeout(socketTimeout);
+		}
 	}
 
 	/**
@@ -368,7 +370,7 @@ public class RadiusClient {
 	 * @throws SocketException
 	 *            Socket Exception
 	 */
-	protected DatagramSocket getSocket() throws SocketException {
+	protected synchronized DatagramSocket getSocket() throws SocketException {
 		if (serverSocket == null || serverSocket.isClosed()) {
 			serverSocket = new DatagramSocket();
 			serverSocket.setSoTimeout(getSocketTimeout());
