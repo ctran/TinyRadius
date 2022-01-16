@@ -35,7 +35,7 @@ public class DictionaryParser {
 	 * @param source
 	 *            input stream
 	 * @return dictionary object
-	 * @throws IOException
+	 * @throws IOException IOException
 	 */
 	public static Dictionary parseDictionary(InputStream source) throws IOException {
 		WritableDictionary d = new MemoryDictionary();
@@ -106,7 +106,7 @@ public class DictionaryParser {
 		if (code == VendorSpecificAttribute.VENDOR_SPECIFIC)
 			type = VendorSpecificAttribute.class;
 		else
-			type = getAttributeTypeClass(code, typeStr);
+			type = getAttributeTypeClass(typeStr);
 
 		// create and cache object
 		dictionary.addAttributeType(new AttributeType(code, name, type));
@@ -143,7 +143,7 @@ public class DictionaryParser {
 		int code = Integer.parseInt(tok.nextToken().trim());
 		String typeStr = tok.nextToken().trim();
 
-		Class<? extends RadiusAttribute> type = getAttributeTypeClass(code, typeStr);
+		Class<? extends RadiusAttribute> type = getAttributeTypeClass(typeStr);
 		AttributeType at = new AttributeType(Integer.parseInt(vendor), code, name, type);
 		dictionary.addAttributeType(at);
 	}
@@ -186,13 +186,11 @@ public class DictionaryParser {
 	 * Returns the RadiusAttribute descendant class for the given
 	 * attribute type.
 	 * 
-	 * @param attributeType
-	 * 
 	 * @param typeStr
 	 *            string|octets|integer|date|ipaddr|ipv6addr|ipv6prefix
 	 * @return RadiusAttribute class or descendant
 	 */
-	private static Class<? extends RadiusAttribute> getAttributeTypeClass(int attributeType, String typeStr) {
+	private static Class<? extends RadiusAttribute> getAttributeTypeClass(String typeStr) {
 		// Default type is RadiusAttribute
 		Class<? extends RadiusAttribute> type = RadiusAttribute.class;
 		if (typeStr.equalsIgnoreCase("string"))
