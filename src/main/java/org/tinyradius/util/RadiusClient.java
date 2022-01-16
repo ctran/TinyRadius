@@ -253,14 +253,12 @@ public class RadiusClient {
 	 * @throws SocketException
 	 *            Socket Exception
 	 */
-	public void setSocketTimeout(int socketTimeout) throws SocketException {
+	public synchronized void setSocketTimeout(int socketTimeout) throws SocketException {
 		if (socketTimeout < 1)
 			throw new IllegalArgumentException("socket timeout must be positive");
 		this.socketTimeout = socketTimeout;
-		synchronized (this) {
-			if (serverSocket != null)
-				serverSocket.setSoTimeout(socketTimeout);
-		}
+		if (serverSocket != null)
+			serverSocket.setSoTimeout(socketTimeout);
 	}
 
 	/**
