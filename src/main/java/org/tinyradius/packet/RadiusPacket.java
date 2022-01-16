@@ -17,8 +17,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.attribute.VendorSpecificAttribute;
@@ -80,7 +78,7 @@ public class RadiusPacket {
 	 *            packet type
 	 */
 	public RadiusPacket(final int type) {
-		this(type, getNextPacketIdentifier(), new ArrayList());
+		this(type, getNextPacketIdentifier(), new ArrayList<>());
 	}
 
 	/**
@@ -93,7 +91,7 @@ public class RadiusPacket {
 	 *            packet identifier
 	 */
 	public RadiusPacket(final int type, final int identifier) {
-		this(type, identifier, new ArrayList());
+		this(type, identifier, new ArrayList<>());
 	}
 
 	/**
@@ -107,7 +105,7 @@ public class RadiusPacket {
 	 * @param attributes
 	 *            list of RadiusAttribute objects
 	 */
-	public RadiusPacket(final int type, final int identifier, final List attributes) {
+	public RadiusPacket(final int type, final int identifier, final List<RadiusAttribute> attributes) {
 		setPacketType(type);
 		setPacketIdentifier(identifier);
 		setAttributes(attributes);
@@ -226,14 +224,13 @@ public class RadiusPacket {
 	 * @param attributes
 	 *            list of RadiusAttribute objects
 	 */
-	public void setAttributes(List attributes) {
+	public void setAttributes(List<RadiusAttribute> attributes) {
 		if (attributes == null)
 			throw new NullPointerException("attributes list is null");
 
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			Object element = i.next();
-			if (!(element instanceof RadiusAttribute))
-				throw new IllegalArgumentException("attribute not an instance of RadiusAttribute");
+		for (RadiusAttribute radiusAttribute : attributes) {
+			if (radiusAttribute == null)
+				throw new NullPointerException("attributes list contains a null");
 		}
 
 		this.attributes = attributes;
@@ -241,7 +238,7 @@ public class RadiusPacket {
 
 	/**
 	 * Adds a Radius attribute to this packet. Can also be used
-	 * to add Vendor-Specific sub-attributes. If a attribute with
+	 * to add Vendor-Specific sub-attributes. If an attribute with
 	 * a vendor code != -1 is passed in, a VendorSpecificAttribute
 	 * is created for the sub-attribute.
 	 * 
@@ -252,9 +249,9 @@ public class RadiusPacket {
 		if (attribute == null)
 			throw new NullPointerException("attribute is null");
 		attribute.setDictionary(getDictionary());
-		if (attribute.getVendorId() == -1)
+		if (attribute.getVendorId() == -1) {
 			this.attributes.add(attribute);
-		else {
+		} else {
 			VendorSpecificAttribute vsa = new VendorSpecificAttribute(attribute.getVendorId());
 			vsa.addSubAttribute(attribute);
 			this.attributes.add(vsa);
@@ -263,7 +260,7 @@ public class RadiusPacket {
 
 	/**
 	 * Adds a Radius attribute to this packet.
-	 * Uses AttributeTypes to lookup the type code and converts
+	 * Uses AttributeTypes to look up the type code and converts
 	 * the value.
 	 * Can also be used to add sub-attributes.
 	 * 
@@ -302,10 +299,9 @@ public class RadiusPacket {
 		}
 		else {
 			// remove Vendor-Specific sub-attribute
-			List vsas = getVendorAttributes(attribute.getVendorId());
-			for (Iterator i = vsas.iterator(); i.hasNext();) {
-				VendorSpecificAttribute vsa = (VendorSpecificAttribute) i.next();
-				List sas = vsa.getSubAttributes();
+			List<VendorSpecificAttribute> vsas = getVendorAttributes(attribute.getVendorId());
+			for (VendorSpecificAttribute vsa : vsas) {
+				List<RadiusAttribute> sas = vsa.getSubAttributes();
 				if (sas.contains(attribute)) {
 					vsa.removeSubAttribute(attribute);
 					if (sas.size() == 1)
@@ -328,27 +324,22 @@ public class RadiusPacket {
 		if (type < 1 || type > 255)
 			throw new IllegalArgumentException("attribute type out of bounds");
 
-		Iterator i = attributes.iterator();
-		while (i.hasNext()) {
-			RadiusAttribute attribute = (RadiusAttribute) i.next();
-			if (attribute.getAttributeType() == type)
-				i.remove();
-		}
+		attributes.removeIf(attribute -> attribute.getAttributeType() == type);
 	}
 
 	/**
-	 * Removes the last occurence of the attribute of the given
+	 * Removes the last occurrence of the attribute of the given
 	 * type from the packet.
 	 * 
 	 * @param type
 	 *            attribute type code
 	 */
 	public void removeLastAttribute(int type) {
-		List attrs = getAttributes(type);
+		List<RadiusAttribute> attrs = getAttributes(type);
 		if (attrs == null || attrs.size() == 0)
 			return;
 
-		RadiusAttribute lastAttribute = (RadiusAttribute) attrs.get(attrs.size() - 1);
+		RadiusAttribute lastAttribute = attrs.get(attrs.size() - 1);
 		removeAttribute(lastAttribute);
 	}
 
@@ -367,16 +358,10 @@ public class RadiusPacket {
 			return;
 		}
 
-		List vsas = getVendorAttributes(vendorId);
-		for (Iterator i = vsas.iterator(); i.hasNext();) {
-			VendorSpecificAttribute vsa = (VendorSpecificAttribute) i.next();
-
-			List sas = vsa.getSubAttributes();
-			for (Iterator j = sas.iterator(); j.hasNext();) {
-				RadiusAttribute attr = (RadiusAttribute) j.next();
-				if (attr.getAttributeType() == typeCode && attr.getVendorId() == vendorId)
-					j.remove();
-			}
+		List<VendorSpecificAttribute> vsas = getVendorAttributes(vendorId);
+		for (VendorSpecificAttribute vsa : vsas) {
+			List<RadiusAttribute> sas = vsa.getSubAttributes();
+			sas.removeIf(attr -> attr.getAttributeType() == typeCode && attr.getVendorId() == vendorId);
 			if (sas.size() == 0)
 				// removed the last sub-attribute
 				// --> remove the whole Vendor-Specific attribute
@@ -392,13 +377,12 @@ public class RadiusPacket {
 	 *            type of attributes to get
 	 * @return list of RadiusAttribute objects, does not return null
 	 */
-	public List getAttributes(int attributeType) {
+	public List<RadiusAttribute> getAttributes(int attributeType) {
 		if (attributeType < 1 || attributeType > 255)
 			throw new IllegalArgumentException("attribute type out of bounds");
 
-		LinkedList result = new LinkedList();
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			RadiusAttribute a = (RadiusAttribute) i.next();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
+		for (RadiusAttribute a : attributes) {
 			if (attributeType == a.getAttributeType())
 				result.add(a);
 		}
@@ -416,17 +400,15 @@ public class RadiusPacket {
 	 *            attribute type code
 	 * @return list of RadiusAttribute objects, never null
 	 */
-	public List getAttributes(int vendorId, int attributeType) {
+	public List<RadiusAttribute> getAttributes(int vendorId, int attributeType) {
 		if (vendorId == -1)
 			return getAttributes(attributeType);
 
-		LinkedList result = new LinkedList();
-		List vsas = getVendorAttributes(vendorId);
-		for (Iterator i = vsas.iterator(); i.hasNext();) {
-			VendorSpecificAttribute vsa = (VendorSpecificAttribute) i.next();
-			List sas = vsa.getSubAttributes();
-			for (Iterator j = sas.iterator(); j.hasNext();) {
-				RadiusAttribute attr = (RadiusAttribute) j.next();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
+		List<VendorSpecificAttribute> vsas = getVendorAttributes(vendorId);
+		for (VendorSpecificAttribute vsa : vsas) {
+			List<RadiusAttribute> sas = vsa.getSubAttributes();
+			for (RadiusAttribute attr : sas) {
 				if (attr.getAttributeType() == attributeType && attr.getVendorId() == vendorId)
 					result.add(attr);
 			}
@@ -441,7 +423,7 @@ public class RadiusPacket {
 	 * 
 	 * @return List of RadiusAttribute objects
 	 */
-	public List getAttributes() {
+	public List<RadiusAttribute> getAttributes() {
 		return attributes;
 	}
 
@@ -453,17 +435,17 @@ public class RadiusPacket {
 	 *            attribute type
 	 * @return RadiusAttribute object or null if there is no such attribute
 	 * @throws RuntimeException
-	 *             if there are multiple occurences of the
+	 *             if there are multiple occurrences of the
 	 *             requested attribute type
 	 */
 	public RadiusAttribute getAttribute(int type) {
-		List attrs = getAttributes(type);
+		List<RadiusAttribute> attrs = getAttributes(type);
 		if (attrs.size() > 1)
 			throw new RuntimeException("multiple attributes of requested type " + type);
 		else if (attrs.size() == 0)
 			return null;
 		else
-			return (RadiusAttribute) attrs.get(0);
+			return attrs.get(0);
 	}
 
 	/**
@@ -476,20 +458,20 @@ public class RadiusPacket {
 	 *            attribute type
 	 * @return RadiusAttribute object or null if there is no such attribute
 	 * @throws RuntimeException
-	 *             if there are multiple occurences of the
+	 *             if there are multiple occurrences of the
 	 *             requested attribute type
 	 */
 	public RadiusAttribute getAttribute(int vendorId, int type) {
 		if (vendorId == -1)
 			return getAttribute(type);
 
-		List attrs = getAttributes(vendorId, type);
+		List<RadiusAttribute> attrs = getAttributes(vendorId, type);
 		if (attrs.size() > 1)
 			throw new RuntimeException("multiple attributes of requested type " + type);
 		else if (attrs.size() == 0)
 			return null;
 		else
-			return (RadiusAttribute) attrs.get(0);
+			return attrs.get(0);
 	}
 
 	/**
@@ -542,10 +524,9 @@ public class RadiusPacket {
 	 *            vendor ID of the attribute(s)
 	 * @return List with VendorSpecificAttribute objects, never null
 	 */
-	public List getVendorAttributes(int vendorId) {
-		LinkedList result = new LinkedList();
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			RadiusAttribute a = (RadiusAttribute) i.next();
+	public List<VendorSpecificAttribute> getVendorAttributes(int vendorId) {
+		ArrayList<VendorSpecificAttribute> result = new ArrayList<>();
+		for (RadiusAttribute a : attributes) {
 			if (a instanceof VendorSpecificAttribute) {
 				VendorSpecificAttribute vsa = (VendorSpecificAttribute) a;
 				if (vsa.getChildVendorId() == vendorId)
@@ -567,9 +548,10 @@ public class RadiusPacket {
 	 * @deprecated use getVendorAttributes(int)
 	 * @see #getVendorAttributes(int)
 	 */
+	@Deprecated
 	public VendorSpecificAttribute getVendorAttribute(int vendorId) {
-		for (Iterator i = getAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC).iterator(); i.hasNext();) {
-			VendorSpecificAttribute vsa = (VendorSpecificAttribute) i.next();
+		for (RadiusAttribute radiusAttribute : getAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC)) {
+			VendorSpecificAttribute vsa = (VendorSpecificAttribute) radiusAttribute;
 			if (vsa.getChildVendorId() == vendorId)
 				return vsa;
 		}
@@ -612,7 +594,7 @@ public class RadiusPacket {
 
 	/**
 	 * Reads a Radius request packet from the given input stream and
-	 * creates an appropiate RadiusPacket descendant object.
+	 * creates an appropriate RadiusPacket descendant object.
 	 * Reads in all attributes and returns the object.
 	 * Decodes the encrypted fields and attributes of the packet.
 	 * 
@@ -634,7 +616,7 @@ public class RadiusPacket {
 
 	/**
 	 * Reads a Radius response packet from the given input stream and
-	 * creates an appropiate RadiusPacket descendant object.
+	 * creates an appropriate RadiusPacket descendant object.
 	 * Reads in all attributes and returns the object.
 	 * Checks the packet authenticator.
 	 * 
@@ -656,7 +638,7 @@ public class RadiusPacket {
 
 	/**
 	 * Reads a Radius request packet from the given input stream and
-	 * creates an appropiate RadiusPacket descendant object.
+	 * creates an appropriate RadiusPacket descendant object.
 	 * Reads in all attributes and returns the object.
 	 * Decodes the encrypted fields and attributes of the packet.
 	 * 
@@ -678,7 +660,7 @@ public class RadiusPacket {
 
 	/**
 	 * Reads a Radius response packet from the given input stream and
-	 * creates an appropiate RadiusPacket descendant object.
+	 * creates an appropriate RadiusPacket descendant object.
 	 * Reads in all attributes and returns the object.
 	 * Checks the packet authenticator.
 	 * 
@@ -718,8 +700,7 @@ public class RadiusPacket {
 
 	/**
 	 * Creates a RadiusPacket object. Depending on the passed type, an
-	 * appropriate packet is created. Also sets the type, and the
-	 * the packet identifier.
+	 * appropriate packet is created. Also sets the type, and the packet identifier.
 	 * 
 	 * @param type
 	 *            packet type
@@ -753,12 +734,11 @@ public class RadiusPacket {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		s.append(getPacketTypeName());
 		s.append(", ID ");
 		s.append(packetIdentifier);
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
+		for (RadiusAttribute attr : attributes) {
 			s.append("\n");
 			s.append(attr.toString());
 		}
@@ -781,7 +761,7 @@ public class RadiusPacket {
 
 	/**
 	 * Sets the authenticator to be used for this Radius packet.
-	 * This method should seldomly be used.
+	 * This method should seldom be used.
 	 * Authenticators are created and managed by this class internally.
 	 * 
 	 * @param authenticator
@@ -811,8 +791,7 @@ public class RadiusPacket {
 	 */
 	public void setDictionary(Dictionary dictionary) {
 		this.dictionary = dictionary;
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
+		for (RadiusAttribute attr : attributes) {
 			attr.setDictionary(dictionary);
 		}
 	}
@@ -881,6 +860,8 @@ public class RadiusPacket {
 	 * authenticator.
 	 * 
 	 * @param sharedSecret
+	 *           shared secret that secures the communication
+	 *           with the other Radius server/client
 	 */
 	protected void encodeRequestAttributes(String sharedSecret) {
 	}
@@ -950,7 +931,7 @@ public class RadiusPacket {
 
 	/**
 	 * Reads a Radius packet from the given input stream and
-	 * creates an appropiate RadiusPacket descendant object.
+	 * creates an appropriate RadiusPacket descendant object.
 	 * Reads in all attributes and returns the object.
 	 * Decodes the encrypted fields and attributes of the packet.
 	 * 
@@ -1004,7 +985,6 @@ public class RadiusPacket {
 
 		// check and count attributes
 		int pos = 0;
-		int attributeCount = 0;
 		while (pos < attributeData.length) {
 			if (pos + 1 >= attributeData.length)
 				throw new RadiusException("bad packet: attribute length mismatch");
@@ -1012,7 +992,6 @@ public class RadiusPacket {
 			if (attributeLength < 2)
 				throw new RadiusException("bad packet: invalid attribute length");
 			pos += attributeLength;
-			attributeCount++;
 		}
 		if (pos != attributeData.length)
 			throw new RadiusException("bad packet: attribute length mismatch");
@@ -1051,7 +1030,7 @@ public class RadiusPacket {
 
 	/**
 	 * Checks the request authenticator against the supplied shared secret.
-	 * Overriden by AccountingRequest to handle special accounting request
+	 * Overridden by AccountingRequest to handle special accounting request
 	 * authenticators. There is no way to check request authenticators for
 	 * authentication requests as they contain secret bytes.
 	 * 
@@ -1062,24 +1041,28 @@ public class RadiusPacket {
 	 * @param attributes
 	 *            request attribute data
 	 * @throws RadiusException
+	 *            RadiusException
 	 */
 	protected void checkRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes) throws RadiusException {
 	}
 
 	/**
-	 * Can be overriden to decode encoded request attributes such as
+	 * Can be overridden to decode encoded request attributes such as
 	 * User-Password. This method may use getAuthenticator() to get the
 	 * request authenticator.
 	 * 
 	 * @param sharedSecret
+	 *            shared secret that secures the communication
+	 *            with the other Radius server/client
 	 * @throws RadiusException
+	 *            RadiusException
 	 */
 	protected void decodeRequestAttributes(String sharedSecret) throws RadiusException {
 	}
 
 	/**
 	 * This method checks the authenticator of this Radius packet. This method
-	 * may be overriden to include special attributes in the authenticator check.
+	 * may be overridden to include special attributes in the authenticator check.
 	 * 
 	 * @param sharedSecret
 	 *            shared secret to be used to encrypt the authenticator
@@ -1125,8 +1108,7 @@ public class RadiusPacket {
 	 */
 	protected byte[] getAttributeBytes() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(MAX_PACKET_LENGTH);
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
-			RadiusAttribute a = (RadiusAttribute) i.next();
+		for (RadiusAttribute a : attributes) {
 			bos.write(a.writeAttribute());
 		}
 		bos.flush();
@@ -1146,7 +1128,7 @@ public class RadiusPacket {
 	/**
 	 * Attributes for this packet.
 	 */
-	private List attributes = new ArrayList();
+	private List<RadiusAttribute> attributes = new ArrayList<>();
 
 	/**
 	 * MD5 digest.
@@ -1171,6 +1153,6 @@ public class RadiusPacket {
 	/**
 	 * Random number generator.
 	 */
-	private static SecureRandom random = new SecureRandom();
+	private static final SecureRandom random = new SecureRandom();
 
 }

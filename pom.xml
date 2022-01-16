@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.tinyradius</groupId>
 	<artifactId>tinyradius</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>TinyRadius Java Radius Library</name>
 	<description>
@@ -43,9 +43,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.8.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -71,6 +71,28 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<showDeprecation>true</showDeprecation>
+					<compilerArgs>-Xlint:unchecked</compilerArgs>
+					<!-- Release directive requires mvn 3.6 and Java 9 or later -->
+					<release>8</release>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
+				<version>2.22.2</version>
 			</plugin>
 		</plugins>
 	</build>

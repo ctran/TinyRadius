@@ -7,7 +7,6 @@
  */
 package org.tinyradius.test;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import org.tinyradius.packet.AccessRequest;
 import org.tinyradius.packet.RadiusPacket;
@@ -22,9 +21,10 @@ import org.tinyradius.util.RadiusServer;
 public class TestServer {
 
 	/**
-	 * @throws IOException
+	 * Test server which terminates after 30 s.
+	 * @throws Exception Exception
 	 */
-	public static void main(String[] args) throws IOException, Exception {
+	public static void main(String[] args) throws Exception {
 		RadiusServer server = new RadiusServer() {
 			// Authorize localhost/testing123
 			public String getSharedSecret(InetSocketAddress client) {

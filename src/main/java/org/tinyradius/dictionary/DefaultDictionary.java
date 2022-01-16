@@ -37,9 +37,9 @@ extends MemoryDictionary{
 	private static final String DICTIONARY_RESOURCE = "org/tinyradius/dictionary/default_dictionary";
 	private static DefaultDictionary instance = null;
 
-	/**
+	/*
 	 * Creates the singleton instance of this object
-	 * and parses the classpath ressource.
+	 * and parses the classpath resource.
 	 */
 	static {
 		try {

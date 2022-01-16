@@ -6,7 +6,7 @@
  */
 package org.tinyradius.util;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class contains miscellaneous static utility functions.
@@ -20,11 +20,7 @@ public class RadiusUtil {
 	 * @return UTF-8 byte array
 	 */
 	public static byte[] getUtf8Bytes(String str) {
-		try {
-			return str.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException uee) {
-			return str.getBytes();
-		}
+		return str.getBytes(StandardCharsets.UTF_8);
 	}
 	
 	/**
@@ -34,11 +30,7 @@ public class RadiusUtil {
 	 * @return Java string
 	 */
 	public static String getStringFromUtf8(byte[] utf8) {
-		try {
-			return new String(utf8, "UTF-8");
-		} catch (UnsupportedEncodingException uee) {
-			return new String(utf8);
-		}
+		return new String(utf8, StandardCharsets.UTF_8);
 	}
 	
 	/**
@@ -48,10 +40,10 @@ public class RadiusUtil {
 	 * @return hex string
 	 */
 	public static String getHexString(byte[] data) {
-		StringBuffer hex = new StringBuffer("0x");
+		StringBuilder hex = new StringBuilder("0x");
 		if (data != null)
-			for (int i = 0; i < data.length; i++) {
-				String digit = Integer.toString(data[i] & 0x0ff, 16);
+			for (byte datum : data) {
+				String digit = Integer.toString(datum & 0x0ff, 16);
 				if (digit.length() < 2)
 					hex.append('0');
 				hex.append(digit);

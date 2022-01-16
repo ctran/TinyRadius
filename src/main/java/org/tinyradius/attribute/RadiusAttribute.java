@@ -96,8 +96,6 @@ public class RadiusAttribute {
 	 * Gets the value of this attribute as a string.
 	 * 
 	 * @return value
-	 * @exception RadiusException
-	 *                if the value is invalid
 	 */
 	public String getAttributeValue() {
 		return RadiusUtil.getHexString(getAttributeData());
@@ -168,7 +166,7 @@ public class RadiusAttribute {
 	/**
 	 * Reads in this attribute from the passed byte array.
 	 * 
-	 * @param data
+	 * @param data  Raw Attribute data
 	 */
 	public void readAttribute(byte[] data, int offset, int length) throws RadiusException {
 		if (length < 2)
@@ -234,7 +232,7 @@ public class RadiusAttribute {
 		AttributeType at = dictionary.getAttributeTypeByCode(vendorId, attributeType);
 		if (at != null && at.getAttributeClass() != null) {
 			try {
-				attribute = (RadiusAttribute) at.getAttributeClass().newInstance();
+				attribute = at.getAttributeClass().getDeclaredConstructor().newInstance();
 			}
 			catch (Exception e) {
 				// error instantiating class - should not occur

@@ -56,7 +56,7 @@ public class IntegerAttribute extends RadiusAttribute {
 				return name;
 		}
 		// Radius uses only unsigned values....
-		return Long.toString(((long)value & 0xffffffffl));
+		return Long.toString(((long)value & 0xffffffffL));
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class IntegerAttribute extends RadiusAttribute {
 		if (at != null) {
 			Integer val = at.getEnumeration(value);
 			if (val != null) {
-				setAttributeValue(val.intValue());
+				setAttributeValue(val);
 				return;
 			}
 		}

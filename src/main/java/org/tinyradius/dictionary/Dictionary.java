@@ -19,7 +19,7 @@ public interface Dictionary {
 	 * @param typeName name of the attribute type 
 	 * @return AttributeType object or null
 	 */
-	public AttributeType getAttributeTypeByName(String typeName);
+	AttributeType getAttributeTypeByName(String typeName);
 	
 	/**
 	 * Retrieves an attribute type by type code. This method
@@ -27,7 +27,7 @@ public interface Dictionary {
 	 * @param typeCode type code, 1-255
 	 * @return AttributeType object or null
 	 */
-	public AttributeType getAttributeTypeByCode(int typeCode);
+	AttributeType getAttributeTypeByCode(int typeCode);
 	
 	/**
 	 * Retrieves an attribute type for a vendor-specific
@@ -36,7 +36,7 @@ public interface Dictionary {
 	 * @param typeCode type code, 1-255
 	 * @return AttributeType object or null
 	 */
-	public AttributeType getAttributeTypeByCode(int vendorId, int typeCode);
+	AttributeType getAttributeTypeByCode(int vendorId, int typeCode);
 
 	/**
 	 * Retrieves the name of the vendor with the given
@@ -44,7 +44,7 @@ public interface Dictionary {
 	 * @param vendorId vendor number
 	 * @return vendor name or null
 	 */
-	public String getVendorName(int vendorId);
+	String getVendorName(int vendorId);
 	
 	/**
 	 * Retrieves the ID of the vendor with the given
@@ -52,6 +52,6 @@ public interface Dictionary {
 	 * @param vendorName name of the vendor
 	 * @return vendor ID or -1
 	 */
-	public int getVendorId(String vendorName);
+	int getVendorId(String vendorName);
 	
 }

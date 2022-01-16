@@ -10,8 +10,6 @@ package org.tinyradius.attribute;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import org.tinyradius.dictionary.AttributeType;
 import org.tinyradius.dictionary.Dictionary;
@@ -50,6 +48,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * Sets the vendor ID of the child attributes.
 	 * 
 	 * @param childVendorId
+	 *           vendor ID of the child attributes
 	 */
 	public void setChildVendorId(int childVendorId) {
 		this.childVendorId = childVendorId;
@@ -73,8 +72,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 */
 	public void setDictionary(Dictionary dictionary) {
 		super.setDictionary(dictionary);
-		for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
+		for (RadiusAttribute attr : subAttributes) {
 			attr.setDictionary(dictionary);
 		}
 	}
@@ -87,7 +85,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 */
 	public void addSubAttribute(RadiusAttribute attribute) {
 		if (attribute.getVendorId() != getChildVendorId())
-			throw new IllegalArgumentException("sub attribut has incorrect vendor ID");
+			throw new IllegalArgumentException("sub attribute has incorrect vendor ID");
 
 		subAttributes.add(attribute);
 	}
@@ -137,24 +135,23 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * 
 	 * @return List of RadiusAttribute objects
 	 */
-	public List getSubAttributes() {
+	public List<RadiusAttribute> getSubAttributes() {
 		return subAttributes;
 	}
 
 	/**
-	 * Returns all sub-attributes of this attribut which have the given type.
+	 * Returns all sub-attributes of this attribute which have the given type.
 	 * 
 	 * @param attributeType
 	 *            type of sub-attributes to get
 	 * @return list of RadiusAttribute objects, does not return null
 	 */
-	public List getSubAttributes(int attributeType) {
+	public List<RadiusAttribute> getSubAttributes(int attributeType) {
 		if (attributeType < 1 || attributeType > 255)
 			throw new IllegalArgumentException("sub-attribute type out of bounds");
 
-		LinkedList result = new LinkedList();
-		for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-			RadiusAttribute a = (RadiusAttribute) i.next();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
+		for (RadiusAttribute a : subAttributes) {
 			if (attributeType == a.getAttributeType())
 				result.add(a);
 		}
@@ -169,17 +166,17 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 *            sub-attribute type
 	 * @return RadiusAttribute object or null if there is no such sub-attribute
 	 * @throws RuntimeException
-	 *             if there are multiple occurences of the
+	 *             if there are multiple occurrences of the
 	 *             requested sub-attribute type
 	 */
 	public RadiusAttribute getSubAttribute(int type) {
-		List attrs = getSubAttributes(type);
+		List<RadiusAttribute> attrs = getSubAttributes(type);
 		if (attrs.size() > 1)
 			throw new RuntimeException("multiple sub-attributes of requested type " + type);
 		else if (attrs.size() == 0)
 			return null;
 		else
-			return (RadiusAttribute) attrs.get(0);
+			return attrs.get(0);
 	}
 
 	/**
@@ -188,11 +185,10 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * @param type
 	 *            attribute type name
 	 * @return RadiusAttribute object or null if there is no such attribute
-	 * @throws RadiusException
 	 * @throws RuntimeException
 	 *             if the attribute occurs multiple times
 	 */
-	public RadiusAttribute getSubAttribute(String type) throws RadiusException {
+	public RadiusAttribute getSubAttribute(String type) {
 		if (type == null || type.length() == 0)
 			throw new IllegalArgumentException("type name is empty");
 
@@ -218,7 +214,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * @throws RuntimeException
 	 *             attribute occurs multiple times
 	 */
-	public String getSubAttributeValue(String type) throws RadiusException {
+	public String getSubAttributeValue(String type) {
 		RadiusAttribute attr = getSubAttribute(type);
 		if (attr == null) {
 			return null;
@@ -241,8 +237,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 
 		// write sub-attributes
 		try {
-			for (Iterator i = subAttributes.iterator(); i.hasNext();) {
-				RadiusAttribute a = (RadiusAttribute) i.next();
+			for (RadiusAttribute a : subAttributes) {
 				bos.write(a.writeAttribute());
 			}
 		}
@@ -305,7 +300,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		if (pos != vsaLen)
 			throw new RadiusException("Vendor-Specific attribute malformed");
 
-		subAttributes = new ArrayList(count);
+		subAttributes = new ArrayList<>(count);
 		pos = 0;
 		while (pos < vsaLen) {
 			int subtype = data[(offset + 6) + pos] & 0x0ff;
@@ -327,7 +322,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * @see org.tinyradius.attribute.RadiusAttribute#toString()
 	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Vendor-Specific: ");
 		int vendorId = getChildVendorId();
 		String vendorName = getDictionary().getVendorName(vendorId);
@@ -341,8 +336,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 			sb.append("vendor ID ");
 			sb.append(vendorId);
 		}
-		for (Iterator i = getSubAttributes().iterator(); i.hasNext();) {
-			RadiusAttribute attr = (RadiusAttribute) i.next();
+		for (RadiusAttribute attr : getSubAttributes()) {
 			sb.append("\n");
 			sb.append(attr.toString());
 		}
@@ -352,7 +346,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	/**
 	 * Sub attributes. Only set if isRawData == false.
 	 */
-	private List subAttributes = new ArrayList();
+	private List<RadiusAttribute> subAttributes = new ArrayList<>();
 
 	/**
 	 * Vendor ID of sub-attributes.

@@ -45,7 +45,7 @@ public class AccessRequest extends RadiusPacket {
 	 */
 	public static final String AUTH_EAP = "eap";
 
-	public static final Set AUTH_PROTOCOLS = new HashSet(Arrays.asList(AUTH_PAP, AUTH_CHAP, AUTH_MS_CHAP_V2, AUTH_EAP));
+	public static final Set<String> AUTH_PROTOCOLS = new HashSet<>(Arrays.asList(AUTH_PAP, AUTH_CHAP, AUTH_MS_CHAP_V2, AUTH_EAP));
 	
 	/**
 	 * Constructs an empty Access-Request packet.
@@ -56,11 +56,11 @@ public class AccessRequest extends RadiusPacket {
 
 	/**
 	 * Constructs an Access-Request packet, sets the
-	 * code, identifier and adds an User-Name and an
+	 * code, identifier and adds a User-Name and a
 	 * User-Password attribute (PAP).
 	 * 
 	 * @param userName
-	 *            user name
+	 *            username
 	 * @param userPassword
 	 *            user password
 	 */
@@ -74,7 +74,7 @@ public class AccessRequest extends RadiusPacket {
 	 * Sets the User-Name attribute of this Access-Request.
 	 * 
 	 * @param userName
-	 *            user name to set
+	 *            username to set
 	 */
 	public void setUserName(String userName) {
 		if (userName == null)
@@ -110,17 +110,17 @@ public class AccessRequest extends RadiusPacket {
 	}
 
 	/**
-	 * Retrieves the user name from the User-Name attribute.
+	 * Retrieves the username from the User-Name attribute.
 	 * 
-	 * @return user name
+	 * @return username
 	 */
 	public String getUserName() {
-		List attrs = getAttributes(USER_NAME);
-		if (attrs.size() < 1 || attrs.size() > 1)
+		List<RadiusAttribute> attrs = getAttributes(USER_NAME);
+		if (attrs.size() != 1)
 			throw new RuntimeException("exactly one User-Name attribute required");
 
-		RadiusAttribute ra = (RadiusAttribute) attrs.get(0);
-		return ((StringAttribute) ra).getAttributeValue();
+		RadiusAttribute ra = attrs.get(0);
+		return ra.getAttributeValue();
 	}
 
 	/**
@@ -152,6 +152,7 @@ public class AccessRequest extends RadiusPacket {
 	 * and CHAP.
 	 * 
 	 * @param plaintext
+	 *        Plain text password
 	 * @return true if the password is valid, false otherwise
 	 */
 	public boolean verifyPassword(String plaintext) throws RadiusException {
@@ -219,24 +220,26 @@ public class AccessRequest extends RadiusPacket {
 		// ok for proxied packets whose CHAP password is already encrypted
 		// throw new RuntimeException("no password set");
 
-		if (getAuthProtocol().equals(AUTH_PAP)) {
-			byte[] pass = encodePapPassword(RadiusUtil.getUtf8Bytes(this.password), RadiusUtil.getUtf8Bytes(sharedSecret));
-			removeAttributes(USER_PASSWORD);
-			addAttribute(new RadiusAttribute(USER_PASSWORD, pass));
-		}
-		else if (getAuthProtocol().equals(AUTH_CHAP)) {
-			byte[] challenge = createChapChallenge();
-			byte[] pass = encodeChapPassword(password, challenge);
-			removeAttributes(CHAP_PASSWORD);
-			removeAttributes(CHAP_CHALLENGE);
-			addAttribute(new RadiusAttribute(CHAP_PASSWORD, pass));
-			addAttribute(new RadiusAttribute(CHAP_CHALLENGE, challenge));
-		}
-		else if (getAuthProtocol().equals(AUTH_MS_CHAP_V2)) {
-			throw new RuntimeException("encoding not supported for " + AUTH_MS_CHAP_V2); 
-		}
-		else if (getAuthProtocol().equals(AUTH_EAP)) {
-			throw new RuntimeException("encoding not supported for " + AUTH_EAP); 
+		switch (getAuthProtocol()) {
+			case AUTH_PAP: {
+				byte[] pass = encodePapPassword(RadiusUtil.getUtf8Bytes(this.password), RadiusUtil.getUtf8Bytes(sharedSecret));
+				removeAttributes(USER_PASSWORD);
+				addAttribute(new RadiusAttribute(USER_PASSWORD, pass));
+				break;
+			}
+			case AUTH_CHAP: {
+				byte[] challenge = createChapChallenge();
+				byte[] pass = encodeChapPassword(password, challenge);
+				removeAttributes(CHAP_PASSWORD);
+				removeAttributes(CHAP_CHALLENGE);
+				addAttribute(new RadiusAttribute(CHAP_PASSWORD, pass));
+				addAttribute(new RadiusAttribute(CHAP_CHALLENGE, challenge));
+				break;
+			}
+			case AUTH_MS_CHAP_V2:
+				throw new RuntimeException("encoding not supported for " + AUTH_MS_CHAP_V2);
+			case AUTH_EAP:
+				throw new RuntimeException("encoding not supported for " + AUTH_EAP);
 		}
 	}
 
@@ -254,7 +257,7 @@ public class AccessRequest extends RadiusPacket {
 		// to 128 bytes. If it isn't a multiple of 16 bytes fill it out with zeroes
 		// to make it a multiple of 16 bytes. If it is greater than 128 bytes
 		// truncate it at 128.
-		byte[] userPassBytes = null;
+		byte[] userPassBytes;
 		if (userPass.length > 128) {
 			userPassBytes = new byte[128];
 			System.arraycopy(userPass, 0, userPassBytes, 0, 128);
@@ -264,7 +267,7 @@ public class AccessRequest extends RadiusPacket {
 		}
 
 		// declare the byte array to hold the final product
-		byte[] encryptedPass = null;
+		byte[] encryptedPass;
 		if (userPassBytes.length < 128) {
 			if (userPassBytes.length % 16 == 0) {
 				// tt is already a multiple of 16 bytes
@@ -297,7 +300,7 @@ public class AccessRequest extends RadiusPacket {
 				md5.update(encryptedPass, i - 16, 16);
 			}
 
-			byte bn[] = md5.digest();
+			byte[] bn = md5.digest();
 
 			// perform the XOR as specified by RFC 2865.
 			for (int j = 0; j < 16; j++)
@@ -330,7 +333,7 @@ public class AccessRequest extends RadiusPacket {
 			md5.reset();
 			md5.update(sharedSecret);
 			md5.update(i == 0 ? getAuthenticator() : lastBlock);
-			byte bn[] = md5.digest();
+			byte[] bn = md5.digest();
 
 			System.arraycopy(encryptedPass, i, lastBlock, 0, 16);
 
@@ -437,7 +440,7 @@ public class AccessRequest extends RadiusPacket {
 	/**
 	 * Random generator
 	 */
-	private static SecureRandom random = new SecureRandom();
+	private static final SecureRandom random = new SecureRandom();
 
 	/**
 	 * Radius type code for Radius attribute User-Name
@@ -478,6 +481,6 @@ public class AccessRequest extends RadiusPacket {
 	/**
 	 * Logger for logging information about malformed packets
 	 */
-	private static Log logger = LogFactory.getLog(AccessRequest.class);
+	private static final Log logger = LogFactory.getLog(AccessRequest.class);
 
 }
