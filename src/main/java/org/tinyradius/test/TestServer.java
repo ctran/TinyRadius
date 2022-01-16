@@ -21,8 +21,8 @@ import org.tinyradius.util.RadiusServer;
 public class TestServer {
 
 	/**
-	 * @throws Exception
-	 *           Exception
+	 * Test server which terminates after 30 s.
+	 * @throws Exception Exception
 	 */
 	public static void main(String[] args) throws Exception {
 		RadiusServer server = new RadiusServer() {

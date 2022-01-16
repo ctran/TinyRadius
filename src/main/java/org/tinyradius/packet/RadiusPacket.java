@@ -17,7 +17,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import org.tinyradius.attribute.RadiusAttribute;
 import org.tinyradius.attribute.VendorSpecificAttribute;
@@ -382,7 +381,7 @@ public class RadiusPacket {
 		if (attributeType < 1 || attributeType > 255)
 			throw new IllegalArgumentException("attribute type out of bounds");
 
-		LinkedList<RadiusAttribute> result = new LinkedList<>();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
 		for (RadiusAttribute a : attributes) {
 			if (attributeType == a.getAttributeType())
 				result.add(a);
@@ -405,7 +404,7 @@ public class RadiusPacket {
 		if (vendorId == -1)
 			return getAttributes(attributeType);
 
-		LinkedList<RadiusAttribute> result = new LinkedList<>();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
 		List<VendorSpecificAttribute> vsas = getVendorAttributes(vendorId);
 		for (VendorSpecificAttribute vsa : vsas) {
 			List<RadiusAttribute> sas = vsa.getSubAttributes();
@@ -526,7 +525,7 @@ public class RadiusPacket {
 	 * @return List with VendorSpecificAttribute objects, never null
 	 */
 	public List<VendorSpecificAttribute> getVendorAttributes(int vendorId) {
-		LinkedList<VendorSpecificAttribute> result = new LinkedList<>();
+		ArrayList<VendorSpecificAttribute> result = new ArrayList<>();
 		for (RadiusAttribute a : attributes) {
 			if (a instanceof VendorSpecificAttribute) {
 				VendorSpecificAttribute vsa = (VendorSpecificAttribute) a;

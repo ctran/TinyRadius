@@ -10,7 +10,6 @@ package org.tinyradius.attribute;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import org.tinyradius.dictionary.AttributeType;
 import org.tinyradius.dictionary.Dictionary;
@@ -151,7 +150,7 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		if (attributeType < 1 || attributeType > 255)
 			throw new IllegalArgumentException("sub-attribute type out of bounds");
 
-		LinkedList<RadiusAttribute> result = new LinkedList<>();
+		ArrayList<RadiusAttribute> result = new ArrayList<>();
 		for (RadiusAttribute a : subAttributes) {
 			if (attributeType == a.getAttributeType())
 				result.add(a);
