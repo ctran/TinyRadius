@@ -149,8 +149,10 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 	 * @return list of RadiusAttribute objects, does not return null
 	 */
 	public List getSubAttributes(int attributeType) {
+                // Vendor specific attribute has values > 255 and < 1
+                /*
 		if (attributeType < 1 || attributeType > 255)
-			throw new IllegalArgumentException("sub-attribute type out of bounds");
+			throw new IllegalArgumentException("sub-attribute type out of bounds");*/
 
 		LinkedList result = new LinkedList();
 		for (Iterator i = subAttributes.iterator(); i.hasNext();) {
@@ -243,7 +245,10 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		try {
 			for (Iterator i = subAttributes.iterator(); i.hasNext();) {
 				RadiusAttribute a = (RadiusAttribute) i.next();
-				bos.write(a.writeAttribute());
+                                if(getChildVendorId() == 8164)
+				    bos.write(a.write2ByteAttribute());
+                                else
+				    bos.write(a.writeAttribute());
 			}
 		}
 		catch (IOException ioe) {
@@ -296,22 +301,43 @@ public class VendorSpecificAttribute extends RadiusAttribute {
 		int count = 0;
 		while (pos < vsaLen) {
 			if (pos + 1 >= vsaLen)
-				throw new RadiusException("Vendor-Specific attribute malformed");
+				throw new RadiusException("Vendor-Specific attribute malformed [pos +1 >= vsaLen]");
 			// int vsaSubType = data[(offset + 6) + pos] & 0x0ff;
-			int vsaSubLen = data[(offset + 6) + pos + 1] & 0x0ff;
+			int vsaSubLen = 0;
+                        if(vendorId ==8164) //Starent NW 2 byte tag & length
+                        {
+                            vsaSubLen = (unsignedByteToInt(data[(offset + 6) + pos + 2]) << 8 | unsignedByteToInt(data[(offset + 6) + pos + 3]));
+                        }
+                        else
+			    vsaSubLen = data[(offset + 6) + pos + 1] & 0x0ff;
+                        if(vsaSubLen < 2)
+				throw new RadiusException("Vendor-Specific attribute malformed: attr length: " + vsaSubLen);
 			pos += vsaSubLen;
 			count++;
 		}
 		if (pos != vsaLen)
-			throw new RadiusException("Vendor-Specific attribute malformed");
+			throw new RadiusException("Vendor-Specific attribute malformed [pos != vsaLen]");
 
 		subAttributes = new ArrayList(count);
 		pos = 0;
 		while (pos < vsaLen) {
-			int subtype = data[(offset + 6) + pos] & 0x0ff;
-			int sublength = data[(offset + 6) + pos + 1] & 0x0ff;
+			int subtype = 0;
+			int sublength = 0;
+                        if(vendorId ==8164) //Starent NW 2 byte tag & length
+                        {
+                            subtype = (unsignedByteToInt(data[(offset + 6) + pos]) << 8 | unsignedByteToInt(data[(offset + 6) + pos + 1]));
+                            sublength = (unsignedByteToInt(data[(offset + 6) + pos + 2]) << 8 | unsignedByteToInt(data[(offset + 6) + pos + 3]));
+                        }
+                        else
+                        {
+			    subtype = data[(offset + 6) + pos] & 0x0ff;
+			    sublength = data[(offset + 6) + pos + 1] & 0x0ff;
+                        }
 			RadiusAttribute a = createRadiusAttribute(getDictionary(), vendorId, subtype);
-			a.readAttribute(data, (offset + 6) + pos, sublength);
+                        if(vendorId ==8164) //Starent NW 2 byte tag & length
+			    a.read2ByteAttribute(data, (offset + 6) + pos, sublength);
+                        else
+			    a.readAttribute(data, (offset + 6) + pos, sublength);
 			subAttributes.add(a);
 			pos += sublength;
 		}
