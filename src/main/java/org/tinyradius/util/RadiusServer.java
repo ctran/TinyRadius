@@ -224,13 +224,12 @@ public abstract class RadiusServer {
 	/**
 	 * Sets the socket timeout.
 	 * 
-	 * @param socketTimeout
-	 *            socket timeout, >0 ms
-	 * @throws SocketException
+	 * @param socketTimeout when socket timeout, >0 ms
+	 * @throws SocketException when socketTime is not positive
 	 */
 	public void setSocketTimeout(int socketTimeout) throws SocketException {
 		if (socketTimeout < 1)
-			throw new IllegalArgumentException("socket tiemout must be positive");
+			throw new IllegalArgumentException("socket timeout must be positive");
 		this.socketTimeout = socketTimeout;
 		if (authSocket != null)
 			authSocket.setSoTimeout(socketTimeout);
@@ -279,7 +278,7 @@ public abstract class RadiusServer {
 	 * same address.
 	 * 
 	 * @param duplicateInterval
-	 *            duplicate interval (ms), >0
+	 * @throws IllegalArgumentException when duplicateInterval (ms), >0
 	 */
 	public void setDuplicateInterval(long duplicateInterval) {
 		if (duplicateInterval <= 0)
@@ -341,8 +340,6 @@ public abstract class RadiusServer {
 	 * Returns when stop() is called.
 	 * 
 	 * @throws SocketException
-	 * @throws InterruptedException
-	 * 
 	 */
 	protected void listenAuth() throws SocketException {
 		listen(getAuthSocket());
@@ -353,7 +350,6 @@ public abstract class RadiusServer {
 	 * Returns when stop() is called.
 	 * 
 	 * @throws SocketException
-	 * @throws InterruptedException
 	 */
 	protected void listenAcct() throws SocketException {
 		listen(getAcctSocket());
