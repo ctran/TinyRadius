@@ -31,4 +31,4 @@ jobs:
             -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} \
             -DreleaseVersion=${{ github.event.inputs.releaseVersion }}
 
-          git push --all --tags
+          git push && git push --tags
