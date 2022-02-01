@@ -11,13 +11,24 @@ on:
         required: true
         default: "X.Y.Z-SNAPSHOT"
 jobs:
-  publish:
+  prepare:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          git config --global user.name 'Cuong Tran'
+          git config --global user.email 'ctran@users.noreply.github.com'
+
       - uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
       - name: Prepare release
-        run: mvn -V -B release:prepare -DdevelopmentVersion=${{ developmentVersion }} -DreleaseVersion=${{ github.event.inputs.releaseVersion }}
+        run: |
+          mvn -V -B -ntp release:prepare \
+            -DpreparationGoals=validate \
+            -DpushChanges=false \
+            -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} \
+            -DreleaseVersion=${{ github.event.inputs.releaseVersion }}
+
+          git push --tags

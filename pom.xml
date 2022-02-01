@@ -36,8 +36,8 @@
 		<connection>scm:git:http://github.com/ctran/TinyRadius.git</connection>
 		<developerConnection>scm:git:http://github.com/ctran/TinyRadius.git</developerConnection>
 		<url>http://github.com/ctran/TinyRadius/</url>
-	  <tag>v1.1.2</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
