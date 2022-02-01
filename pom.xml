@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.tinyradius</groupId>
 	<artifactId>tinyradius</artifactId>
-	<version>1.1.3-SNAPSHOT</version>
+	<version>1.1.3-rc.2</version>
 	<packaging>jar</packaging>
 	<name>TinyRadius Java Radius Library</name>
 	<description>
@@ -36,7 +36,7 @@
 		<connection>scm:git:http://github.com/ctran/TinyRadius.git</connection>
 		<developerConnection>scm:git:http://github.com/ctran/TinyRadius.git</developerConnection>
 		<url>http://github.com/ctran/TinyRadius/</url>
-		<tag>HEAD</tag>
+		<tag>v1.1.3-rc.2</tag>
 	</scm>
 
 	<properties>
