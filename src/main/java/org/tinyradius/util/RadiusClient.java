@@ -207,7 +207,7 @@ public class RadiusClient {
 	 * Sets the retry count for failed transmissions.
 	 * 
 	 * @param retryCount
-	 *            retry count, >0
+	 * @throws IllegalArgumentException when retry count is not positive
 	 */
 	public void setRetryCount(int retryCount) {
 		if (retryCount < 1)

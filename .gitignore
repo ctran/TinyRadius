@@ -2,11 +2,15 @@ bin
 dist
 build
 doc/apidoc
+release.properties
 target
+.DS_Store
 .settings
 .classpath
 .project
 .flattened-pom.xml
+
+*.releaseBackup
 
 # IntelliJ IDEA
 *.iml

@@ -96,8 +96,6 @@ public class RadiusAttribute {
 	 * Gets the value of this attribute as a string.
 	 * 
 	 * @return value
-	 * @exception RadiusException
-	 *                if the value is invalid
 	 */
 	public String getAttributeValue() {
 		return RadiusUtil.getHexString(getAttributeData());
@@ -167,8 +165,10 @@ public class RadiusAttribute {
 
 	/**
 	 * Reads in this attribute from the passed byte array.
-	 * 
-	 * @param data
+	 * @param data  data buffer
+	 * @param offset the offset to read
+	 * @param length the amount of data to read
+	 * @throws RadiusException when length is less than 2
 	 */
 	public void readAttribute(byte[] data, int offset, int length) throws RadiusException {
 		if (length < 2)

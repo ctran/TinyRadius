@@ -18,7 +18,8 @@ public class TestClient {
 	
 	/**
 	 * Radius command line client.
-	 * <br/>Usage: TestClient <i>hostName sharedSecret userName password</i>
+	 *
+	 * Usage: TestClient <i>hostName sharedSecret userName password</i>
 	 * @param args arguments
 	 * @throws Exception
 	 */

@@ -105,8 +105,7 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * Sets the socket timeout.
 	 * 
 	 * @param socketTimeout
-	 *            socket timeout, >0 ms
-	 * @throws SocketException
+	 * @throws SocketException when socket timeout, >0 ms
 	 */
 	public void setSocketTimeout(int socketTimeout) throws SocketException {
 		super.setSocketTimeout(socketTimeout);
@@ -214,7 +213,7 @@ public abstract class RadiusProxy extends RadiusServer {
 	 * 
 	 * @param packet
 	 *            the packet to proxy
-	 * @param proxyCon
+	 * @param proxyConnection
 	 *            the RadiusProxyConnection for this packet
 	 * @throws IOException
 	 */

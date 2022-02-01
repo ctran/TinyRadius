@@ -6,7 +6,7 @@ import org.tinyradius.util.RadiusUtil;
 
 /**
  * CoA packet. Thanks to Michael Krastev.
- * @author Michael Krastev <mkrastev@gmail.com>
+ * @author Michael Krastev
  */
 public class CoaRequest extends RadiusPacket {
 
