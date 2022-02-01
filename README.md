@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ctran/TinyRadius.svg?branch=master)](https://travis-ci.org/ctran/TinyRadius)
+[![Build Status](https://github.com/ctran/TinyRadius/actions/workflows/ci.yml/badge.svg)](https://github.com/ctran/TinyRadius/actions/workflows/ci.yml)
  
 TinyRadius README
 
