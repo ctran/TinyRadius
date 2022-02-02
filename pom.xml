@@ -35,7 +35,7 @@
 	<scm>
 		<connection>scm:git:http://github.com/ctran/TinyRadius.git</connection>
 		<developerConnection>scm:git:http://github.com/ctran/TinyRadius.git</developerConnection>
-		<url>http://github.com/ctran/TinyRadius/</url>
+		<url>https://github.com/ctran/TinyRadius/</url>
 		<tag>HEAD</tag>
 	</scm>
 
