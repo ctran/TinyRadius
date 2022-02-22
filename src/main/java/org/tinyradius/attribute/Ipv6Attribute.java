@@ -77,11 +77,11 @@ public class Ipv6Attribute extends RadiusAttribute {
 	 * Check attribute length.
 	 * @see org.tinyradius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
 	 */
-	public void readAttribute(byte[] data, int offset, int length)
+	public void readAttribute(byte[] data, int offset, int attrType, int attrLen, int attrTypeSize, int attrLenSize)
 	throws RadiusException {
-		if (length != 18)
+		if (attrLen != 16 + attrTypeSize + attrLenSize)
 			throw new RadiusException("IP attribute: expected 16 bytes data");
-		super.readAttribute(data, offset, length);
+		super.readAttribute(data, offset, attrType, attrLen, attrTypeSize, attrLenSize);
 	}
 
 }

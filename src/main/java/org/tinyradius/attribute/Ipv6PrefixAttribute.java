@@ -97,11 +97,11 @@ public class Ipv6PrefixAttribute extends RadiusAttribute {
 	 * Check attribute length.
 	 * @see org.tinyradius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
 	 */
-	public void readAttribute(byte[] data, int offset, int length)
+	public void readAttribute(byte[] data, int offset, int attrType, int attrLen, int attrTypeSize, int attrLenSize)
 	throws RadiusException {
-		if (length > 20 || length < 4)
+		if (attrLen > 20 + attrTypeSize + attrLenSize || attrLen < 4 + attrTypeSize + attrLenSize)
 			throw new RadiusException("IPv6 prefix attribute: expected 4-20 bytes data");
-		super.readAttribute(data, offset, length);
+		super.readAttribute(data, offset, attrType, attrLen, attrTypeSize, attrLenSize);
 	}
 
 }

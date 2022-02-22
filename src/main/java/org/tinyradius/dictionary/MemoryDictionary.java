@@ -84,6 +84,16 @@ public class MemoryDictionary implements WritableDictionary {
 		return -1;
 	}
 
+	@Override
+	public int getVendorTypeSize(int vendorId) {
+		return vendorsTypeSize.get(vendorId) != null ? (int) vendorsTypeSize.get(vendorId) : 1;
+	}
+
+	@Override
+	public int getVendorLengthSize(int vendorId) {
+		return vendorsLengthSize.get(vendorId) != null ? (int) vendorsLengthSize.get(vendorId) : 1;
+	}
+
 	/**
 	 * Retrieves the name of the vendor with the given code from
 	 * the cache.
@@ -115,6 +125,21 @@ public class MemoryDictionary implements WritableDictionary {
 		if (vendorName == null || vendorName.length() == 0)
 			throw new IllegalArgumentException("vendor name empty");
 		vendorsByCode.put(new Integer(vendorId), vendorName);
+	}
+
+	@Override
+	public void addVendor(int vendorId, String vendorName, int vendorType, int vendorLength) {
+		addVendor(vendorId, vendorName);
+
+		if(vendorType != 1 && vendorType !=2 && vendorType != 4) {
+			throw new IllegalArgumentException("vendor type size can only be [1,2,4]");
+		}
+		if(vendorLength != 1 && vendorLength != 2) {
+			throw new IllegalArgumentException("vendor length size can only be [1,2]");
+		}
+
+		vendorsTypeSize.put(vendorId, vendorType);
+		vendorsLengthSize.put(vendorId, vendorLength);
 	}
 
 	/**
@@ -149,6 +174,8 @@ public class MemoryDictionary implements WritableDictionary {
 	}
 
 	private Map vendorsByCode = new HashMap(); // <Integer, String>
+	private Map vendorsTypeSize = new HashMap(); // <Integer, Integer>
+	private Map vendorsLengthSize = new HashMap(); // <Integer, Integer>
 	private Map attributesByCode = new HashMap(); // <Integer, <Integer, AttributeType>>
 	private Map attributesByName = new HashMap(); // <String, AttributeType>
 

@@ -121,11 +121,11 @@ public class IpAttribute extends RadiusAttribute {
 	 * Check attribute length.
 	 * @see org.tinyradius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
 	 */
-	public void readAttribute(byte[] data, int offset, int length)
+	public void readAttribute(byte[] data, int offset, int attrType, int attrLen, int attrTypeSize, int attrLenSize)
 	throws RadiusException {
-		if (length != 6)
+		if (attrLen != 4 + attrTypeSize + attrLenSize)
 			throw new RadiusException("IP attribute: expected 4 bytes data");
-		super.readAttribute(data, offset, length);
+		super.readAttribute(data, offset, attrType, attrLen, attrTypeSize, attrLenSize);
 	}
 
 }

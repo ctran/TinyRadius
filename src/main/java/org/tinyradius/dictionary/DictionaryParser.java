@@ -152,13 +152,32 @@ public class DictionaryParser {
 	 * Parses a line containing a vendor declaration.
 	 */
 	private static void parseVendorLine(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
-		if (tok.countTokens() != 2)
+		if (tok.countTokens() != 3 && tok.countTokens() != 2)
 			throw new IOException("syntax error on line " + lineNum);
 
 		int vendorId = Integer.parseInt(tok.nextToken().trim());
 		String vendorName = tok.nextToken().trim();
+		int vendorType = 1;
+		int vendorLength = 1;
+		if(tok.countTokens() == 1) {
+			String format = tok.nextToken();
+			if(!format.startsWith("format=")) {
+				throw new IOException("syntax error on line " + lineNum);
+			}
+			String[] formatTokens = format.substring(7).split(",");
+			if(formatTokens.length != 2) {
+				throw new IOException("syntax error on line " + lineNum);
+			}
+			try {
+				vendorType = Integer.parseInt(formatTokens[0]);
+				vendorLength = Integer.parseInt(formatTokens[1]);
+			} catch (NumberFormatException ex) {
+				throw new IOException("syntax error on line " + lineNum);
+			}
+		}
 
-		dictionary.addVendor(vendorId, vendorName);
+
+		dictionary.addVendor(vendorId, vendorName, vendorType, vendorLength);
 	}
 
 	/**
